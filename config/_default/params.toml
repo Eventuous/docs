@@ -42,7 +42,7 @@ alert = true
 alertText = "Like Eventuous? <a class=\"alert-link\" href=\"https://github.com/Eventuous/eventuous\">Sponsor us  on GitHub</a>. Thanks!</a>"
 
 # Edit Page
-docsRepo = "https://github.com/Eventuous/eventuous"
+docsRepo = "https://github.com/Eventuous/docs"
 editPage = true
 
 [options]
