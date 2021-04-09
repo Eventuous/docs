@@ -10,7 +10,7 @@ rssLimit = 10
 
 # add redirects/headers
 [outputs]
-home = ["HTML", "RSS", "REDIRECTS", "HEADERS"]
+home = ["HTML", "RSS"]
 section = ["HTML", "RSS", "SITEMAP"]
 
 # add output format for section sitemap.xml
