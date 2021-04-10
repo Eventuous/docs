@@ -20,7 +20,9 @@ Eventuous does not claim to be the Almighty Source of Truth. Quite the opposite,
 
 Still, as people demand answers about _how to do it right_, we have one for you here.
 
-![The right way](/images/the-right-way.png)
+{{< imgproc the-right-way Resize "600x" >}}
+The "Right Way" (according to us)
+{{< /imgproc >}}
 
 Quite a few diagrams from articles that claim to explain to you about what Event Sourcing is and how to implement it suffer from the same issues:
 
@@ -36,6 +38,11 @@ Let's briefly go through those issues.
 Message brokers are great, really. It's way better to integrate (micro)services using asynchronous messaging rather than RPC calls. RPC calls introduce spatial and temporal coupling, something you'd want to avoid when doing services.
 
 Still, the integration concern is orthogonal to Event Sourcing; as much as domain events _enable_ message-based integration, it's not a requirement.
+
+[comment]: <> (![The right way]&#40;/images/flaming-bus.jpg&#41;)
+{{< imgproc flaming-bus.jpg Fill "800x450" >}}
+The Bad Bus
+{{< /imgproc >}}
 
 When propagating events to reporting models (read models, query side, whatever you call it) using a broker, you will encounter the following issues:
 
