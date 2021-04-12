@@ -97,10 +97,12 @@ The stateful aggregate class implements most of the abstract members of the orig
 
 | Member | Kind | What it's for |
 | ------ | ---- | ------------- |
-| `Apply` | Method | Given a domain event, applies it to the state. Replaces the current state with the new version. Adds the event to the list of changes. |
+| `Apply` | Method | Given a domain event, applies it to the state. Replaces the current state with the new version. Adds the event to the list of changes. Returns a tuple with the previous and the current state versions. |
 | `State` | Property | Returns the current aggregate state. |
 
 As we don't know how to extract the aggregate identity from this implementation, you still need to implement the `GetId` function.
+
+The `Apply` function is virtual, so you can override it to add some contract-based checks (ensure if the state is valid, or the state transition was valid).
 
 #### Aggregate state
 
