@@ -1,15 +1,12 @@
 ---
 title: "Checkpoints"
 description: "What's a checkpoint and why you need to store it"
-date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
+date: 2021-03-20
 images: []
 menu:
   docs:
     parent: "subscriptions"
 weight: 520
-toc: true
 ---
 
 When you subscribe to an event store, you need to decide what events you want to receive. A proper event store would allow you to subscribe to any event stream, or to a global stream (_All stream_), which contains all the events from the store, ordered by the time they were appended. Event-oriented brokers that support persistence as ordered event logs also support subscriptions, normally called _consumers_, as it's the publish-subscribe broker terminology.
@@ -21,6 +18,8 @@ The subscription decides at what stream position it wants to start receiving eve
 As the subscription receives and processes events, it moves further along the stream it subscribed to. Every event the subscription receives and processes has a position in the subscribed stream. This position can be used as a _checkpoint_ of the subscription. If the application that hosts the subscription eventually shuts down, you'd want the subscription to resubscribe from the position, which was processed last, plus one. That's how you achieve _exactly one_ event handling. Therefore, the subscription needs to take care about storing its checkpoint somewhere, so the last known position can be retrieved from the checkpoint store and used to resubscribe.
 
 Some log-based brokers also use the term _offset_ to describe the checkpoint concept.
+
+Subscriptions, which are managed by the server, **don't require** storing checkpoints on the client side. For example, EventStoreDB persistent subscriptions and Google PubSub subscriptions don't require a client-side checkpoint store. Some subscriptions, like RabbitMQ subscription, don't have this concept at all, as RabbitMQ doesn't keep consumed messages, neither ACKed nor NACKed.
 
 ## Checkpoint store
 

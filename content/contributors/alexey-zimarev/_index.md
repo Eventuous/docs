@@ -8,6 +8,7 @@ draft: false
 
 Creator of Eventuous.
 
-{{< img-simple src="alexey-wroc.jpeg" alt="Alexey's photo" class="border-1" >}}
+{{< imgproc alexey-wroc.jpeg Resize "600x" >}}
+{{< /imgproc >}}
 
 [Twitter](https://twitter.com/Zimareff) - [GitHub](https://github.com/alexeyzimarev) - [Blog](https://zimarev.com)

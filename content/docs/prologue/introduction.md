@@ -1,16 +1,9 @@
 ---
 title: "Introduction"
 description: ""
-lead: ""
-date: 2020-10-06T08:48:57+00:00
-lastmod: 2020-10-06T08:48:57+00:00
-draft: false
+date: 2021-03-10
 images: []
-menu:
-  docs:
-    parent: "prologue"
 weight: 100
-toc: true
 ---
 
 ## What is Eventuous
@@ -20,12 +13,12 @@ Eventuous is a (relatively) lightweight library, which allows building productio
 The base library has a set of abstractions, following Domain-Driven Design tactical patterns, like `Aggregate`.
 
 Additional components include:
-- [Aggregate persistence](../../persistence/aggregate-store) using [EventStoreDB](https://eventstore.com)
-- [Real-time subscriptions](../../subscriptions/subs-concept) for EventStoreDB
+- [Aggregate persistence]({{< ref "aggregate-store" >}}) using [EventStoreDB](https://eventstore.com)
+- [Real-time subscriptions]({{< ref "subs-concept" >}}) for EventStoreDB
 - Read-model projections for MongoDB
 
 {{< alert icon="👉" color="warning" >}}
-Eventuous is in a highly volatile state as it changes according to immediate needs of its production users. The API is not stable and can change at any time.
+👉 Eventuous is in a highly volatile state as it changes according to immediate needs of its production users. The API is not stable and can change at any time.
 {{< /alert  >}}
 
 ### Packages

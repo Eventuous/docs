@@ -21,8 +21,8 @@ In general, the command handling flow can be described like this:
 
 1. The edge receives a command via its API (HTTP, gRPC, SignalR, messaging, etc).
 2. It passes the command over to the application service. As the edge is responsible for authentication and some authorisation, it can enrich commands with user credentials.
-3. The command service, which is agnostic to the API itself, handles the command, and gives response to the edge (positive or negative).
+3. The command service, which is agnostic to the API itself, handles the command and gives a response to the edge (positive or negative).
 4. The API layer then returns the response to the calling party.
 
-Eventuous gives you a base class to implement command services in the application later: the `ApplicationService`.
+Eventuous gives you a base class to implement command services in the application layer: the `ApplicationService`.
 

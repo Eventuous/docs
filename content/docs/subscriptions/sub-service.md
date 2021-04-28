@@ -14,7 +14,9 @@ toc: true
 
 Eventuous implements all subscription types as hosted services. It's because subscriptions need to start when the application starts, work in background when the application is running, then shut down when the application stops.
 
-Eventuous has a `SubscriptionService` base class. Both `AllStreamSubscriptionService` and `StreamSubscriptionService` inherit from it as it handles most of the subscription mechanics, such as:
+Eventuous has a `SubscriptionService` base class. It aims to support a variety of scenarios, using a real-time message delivery infrastructure to feed message handlers (could be events or commands).
+
+All infrastructure-specific subscriptions inherit from `SubscriptionService` as it handles most of the subscription mechanics, such as:
 
 - Selecting event handlers, which the subscription will serve
 - Reading the last known [checkpoint]({{< ref "checkpoint" >}})
@@ -31,8 +33,7 @@ The subscription service requires the following arguments:
 
 | Parameter name | Type | What's it for | Required |
 | -------------- | ---- | ------------- | -------- |
-| `eventStoreClient` | `EventStoreClient` | Client for EventStoreDB | Yes |
-| `subscriptionName` | `string` | Identifier to select event handlers | Yes |
+| `subscriptionId` | `string` | Identifier to select event handlers, also used as a checkpoint id. | Yes |
 | `checkpointStore` | `ICheckpointStore` | [Checkpoint]({{< ref "checkpoint" >}}) store | Yes |
 | `eventSerializer` | `IEventSerializer` | Event [serializer]({{< ref "serialisation" >}}) | Yes |
 | `eventHandlers` | `IEnumerable<IEventHandler>` | List of event handlers | Yes |
@@ -62,7 +63,7 @@ The interface also has the `SubscriptionGroup` property. It is used by the subsc
 
 ## Subscription drops
 
-An EventStoreDB subscription could drop for different reasons. For example, it fails to pass the keep alive ping to the server due to a transient network failure, or it gets overloaded.
+A subscription could drop for different reasons. For example, it fails to pass the keep alive ping to the server due to a transient network failure, or it gets overloaded.
 
 The subscription service handles such drops and issues a resubscribe request, unless the application is shutting down, so the drop is deliberate.
 

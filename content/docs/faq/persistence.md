@@ -1,15 +1,9 @@
 ---
-title: "FAQ: Persistence"
-description: "Persistence"
-date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
+title: "Persistence"
+description: >
+    What about repositories and other questions about persistence
+date: 2021-03-20
 images: []
-menu:
-  docs:
-    parent: "faq"
-weight: 910
-toc: true
 ---
 
 ### Why you don't have repositories?
