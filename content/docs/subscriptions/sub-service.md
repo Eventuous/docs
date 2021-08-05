@@ -55,7 +55,7 @@ public interface IEventHandler {
 
 The `HandleEvent` function will be called by the subscription service for each event it receives. The event is already deserialized. The function also gets the event position in the stream. It might be used in projections to set some property of the read model. Using this property in queries will tell you if the projection is up to date.
 
-{{% alert icon="👻" color="warning" %}}
+{{% alert icon="👻" color="warning" title="Event handler failures" %}}
 If an event handler throws, the whole subscription will fail. Such a failure will cause the subscription drop, and the subscription will resubscribe. If the error is caused by a poison event, which can never be handled, it will keep failing in a loop.
 {{% /alert %}}
 
@@ -75,7 +75,7 @@ When using subscriptions for read model projections, you enter to the world of [
 
 The easiest way to detect such situations is to observe the gap between the last event in the stream, which the subscription listens to, and the event, which is currently being processed. We call it the **subscription gap**.
 
-{{% alert icon="😱" color="warning" %}}
+{{% alert icon="☎️" color="warning" title="Alerting for the gap" %}}
 If the gap increases continuously, your subscription is not catching up with all the events it receives. You need to set up a proper metric for the gap, and trigger an alert if the gap exceeds the value you can tolerate.
 {{% /alert %}}
 

@@ -1,0 +1,16 @@
+{{ $_hugo_config := `{ "version": 1 }` }}
+{{ $color := .Get "color" | default "primary" }}
+<div class="alert alert-{{ $color }} {{ if not (.Get "title") }} d-flex{{ end }}" role="alert">
+{{ if .Get "title" }}
+<h4 class="alert-heading">{{ with .Get "icon" }}{{.}}{{ end }} {{ .Get "title" | safeHTML }}</h4>
+{{ else }}
+<div class="flex-shrink-1 alert-icon">{{ with .Get "icon" }}{{.}}{{ end }}</div>
+{{ end }}
+<div class="w-200" >
+{{ if eq .Page.File.Ext "md" }}
+    {{ .Inner | markdownify }}
+{{ else }}
+    {{ .Inner | htmlUnescape | safeHTML }}
+{{ end }}
+</div>
+</div>

@@ -1,7 +1,8 @@
 ---
 title: "Domain"
-description: "Help Doks."
 date: 2021-03-10
-images: []
 weight: 200
+description: >
+  Building blocks for your domain model.
 ---
+

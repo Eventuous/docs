@@ -18,7 +18,7 @@ Additional components include:
 - Read-model projections for MongoDB
 
 {{< alert icon="👉" color="warning" >}}
-👉 Eventuous is in a highly volatile state as it changes according to immediate needs of its production users. The API is not stable and can change at any time.
+Eventuous is in a highly volatile state as it changes according to immediate needs of its production users. The API is not stable and can change at any time.
 {{< /alert  >}}
 
 ### Packages
@@ -34,7 +34,7 @@ Right now we publish four NuGet packages:
 
 ### Quick Start - WIP
 
-{{< alert icon="👉" >}}
+{{< alert icon="️☢️" >}}
 The Quick Start is intended for intermediate to advanced users.
 {{< /alert >}}
 

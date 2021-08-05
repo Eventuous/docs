@@ -3,7 +3,7 @@ title: "Alexey Zimarev"
 description: "Creator of Eventuous"
 date: 2021-04-09
 lastmod: 2021-04-09
-draft: false
+weight: 10
 ---
 
 Creator of Eventuous.

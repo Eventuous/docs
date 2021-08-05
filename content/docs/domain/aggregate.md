@@ -14,7 +14,7 @@ toc: true
 
 ## Concept
 
-{{% alert icon="👉" color="light" %}}
+{{% alert icon="🧐" color="light" %}}
 If you are familiar with the concept, [scroll down](#implementation).
 {{% /alert %}}
 
@@ -22,7 +22,7 @@ If you are familiar with the concept, [scroll down](#implementation).
 
 When handling a command, you need to ensure it only changes the state of a single aggregate. An aggregate boundary is a transaction boundary, so the state transition for the aggregate needs to happen entirely or not at all.
 
-{{% alert icon="👉" color="light" %}}
+{{% alert icon="👇" color="light" %}}
 **TD;LR** Eventuous doesn't have entities other than the Aggregate Root. If you are okay with that, [scroll down](#implementation).
 {{% /alert %}}
 

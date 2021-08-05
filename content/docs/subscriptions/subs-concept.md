@@ -41,7 +41,7 @@ In Eventuous, subscriptions are specific to event store implementation. We curre
 
 ## The wrong way
 
-One of the common mistakes people make when building an event-sourced application is to use an event store, which is not capable of handling realtime subscriptions. It forces developers to engage some sort of message bus to deliver new events to subscribers. There are [quite a few issues]({{< ref "the-right-way" >}}) with that approach, but the most obvious one is a two-phase commit.
+One of the common mistakes people make when building an event-sourced application is using an event store which is not capable of handling realtime subscriptions. It forces developers to engage some sort of message bus to deliver new events to subscribers. There are [quite a few issues]({{< ref "the-right-way" >}}) with that approach, but the most obvious one is a two-phase commit.
 
 {{% alert icon="📍" %}}
 Read more about the **[Bad Bus →]({{< ref "the-right-way#event-bus" >}})**
@@ -58,4 +58,4 @@ If the second operation fails, the command side of the application would remain 
 
 As mentioned, there are multiple issues of using a message bus as transport to deliver events to reporting models, but we won't be covering them on this page.
 
-The easiest way to solve the issue is to use a database, which supports realtime subscriptions to event streams out of the box. That's why we use EventStoreDB as the primary event store implementation.
+The easiest way to solve the issue is to use a database which supports realtime subscriptions to event streams out of the box. That's why we use EventStoreDB as the primary event store implementation.

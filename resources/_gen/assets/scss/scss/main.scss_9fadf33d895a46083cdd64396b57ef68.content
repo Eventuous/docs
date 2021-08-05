@@ -1,15 +1,13 @@
-/*
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i");
+@import url("https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v27.0.1/dist/font-face.css");
+.alert-icon {
+  margin-right: 0.75rem; }
 
-Add styles or override variables from the theme here.
-
-*/
 /*
 
 Bootstrap variables overrides for theme.
 See https://github.com/twbs/bootstrap/pull/23260
 */
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i");
-@import url("https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v27.0.1/dist/font-face.css");
 @fa-font-path :        "../webfonts";
 /*!
  * Bootstrap v4.5.3 (https://getbootstrap.com/)

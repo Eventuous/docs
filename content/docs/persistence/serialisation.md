@@ -1,15 +1,9 @@
 ---
 title: "Serialisation"
-description: "Serialisation"
-date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
+description: "How events are serialized and deserialized"
+date: 2021-03-10
 images: []
-menu:
-  docs:
-    parent: "persistence"
 weight: 330
-toc: true
 ---
 
 As described on the [Domain events]({{< ref "events" >}}) page, events must be (de)serializable. Eventuous doesn't care about the serialisation format, but requires you to provide a serializer instance, which implements the `IEventSerializer` interface.

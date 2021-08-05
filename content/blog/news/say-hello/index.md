@@ -1,12 +1,8 @@
 ---
 title: "Say hello to Eventuous 👋"
 description: "Introducing Eventuous, an opinionated lightweight library for .NET to build event-sourced applications."
-lead: "Introducing Eventuous, an opinionated lightweight library for .NET to build event-sourced applications."
 date: 2021-03-21
-lastmod: 2021-03-21
-draft: false
-images: ["eventuous-logo.png"]
-contributors: ["Alexey Zimarev"]
+author: Alexey Zimarev
 ---
 
 Honestly, I like heated debates on Twitter; I really do. Due to the nature of my work as a Developer Advocate at Event Store, I engage in many discussions about Event Sourcing. I hear a lot that the idea is great, but using it in real life is way too hard. As I am involved in building production systems, which are event-sourced from the start, I tend to disagree with this statement. I feel that people aren't familiar with some of the implementation details, scaring them off. Unfamiliarity is often mistaken as complexity.
