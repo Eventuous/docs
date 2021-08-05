@@ -306,4 +306,6 @@ exclusive.lck
 .vscode
 version.txt
 /public/
-/resources/_gen/
+**/resources/_gen/
+
+/themes/*/resources/_gen/
