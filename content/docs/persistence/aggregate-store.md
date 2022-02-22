@@ -17,7 +17,7 @@ Eventuous provides a single abstraction for the domain objects persistence, whic
 
 The `AggregateStore` uses the `IEventStore` abstraction to be persistence-agnostic, so it can be used as-is, when you give it a proper implementation of event store.
 
-We have only two operations in the `AggegateStore`:
+We have only two operations in the `AggregateStore`:
 - `Load` - retrieves events from an aggregate stream and restores the aggregate state using those events.
 - `Store` - collects new events from an aggregate and stores those events to the aggregate stream.
 
