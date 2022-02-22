@@ -1,15 +1,8 @@
 ---
-title: "FAQ: Compatibility"
+title: "Compatibility"
 description: "Platforms and SDKs"
-date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
-images: []
-menu:
-  docs:
-    parent: "faq"
+date: 2021-03-20
 weight: 920
-toc: true
 ---
 
 ## Only .NET 5? Why not .NET Framework 3.5?

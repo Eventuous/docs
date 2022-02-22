@@ -1,16 +1,9 @@
 ---
 title: "Introduction"
 description: ""
-lead: ""
-date: 2020-10-06T08:48:57+00:00
-lastmod: 2020-10-06T08:48:57+00:00
-draft: false
+date: 2021-03-10
 images: []
-menu:
-  docs:
-    parent: "prologue"
 weight: 100
-toc: true
 ---
 
 ## What is Eventuous
@@ -20,28 +13,28 @@ Eventuous is a (relatively) lightweight library, which allows building productio
 The base library has a set of abstractions, following Domain-Driven Design tactical patterns, like `Aggregate`.
 
 Additional components include:
-- [Aggregate persistence](../../persistence/aggregate-store) using [EventStoreDB](https://eventstore.com)
-- [Real-time subscriptions](../../subscriptions/subs-concept) for EventStoreDB
+- [Aggregate persistence]({{< ref "aggregate-store" >}}) using [EventStoreDB](https://eventstore.com)
+- [Real-time subscriptions]({{< ref "subs-concept" >}}) for EventStoreDB
 - Read-model projections for MongoDB
 
 {{< alert icon="👉" color="warning" >}}
-Eventuous is in a highly volatile state as it changes according to immediate needs of its production users. The API is not stable and can change at any time.
+Eventuous is in a volatile state as we introduce changes often, according to immediate needs of its production users. The API hasn't reached a stable state  and can change at any time.
 {{< /alert  >}}
 
 ### Packages
 
 Right now we publish four NuGet packages:
 
-| Package | What's it for |
-| ------- | ------------- |
-| `Eventuous` | The core library. |
-| `Eventuous.EventStoreDB` | [Persistence](../../persistence/) support for [EventStoreDB](https://eventstore.com) |
-| `Eventuous.EventStoreDB.Subscriptions` | Real-time subscriptions support for EventStoreDB |
-| `Eventuous.Projections.MongoDB` | Projections support for [MongoDB](https://www.mongodb.com/) |
+| Package                                | What's it for                                                                              |
+|----------------------------------------|--------------------------------------------------------------------------------------------|
+| `Eventuous`                            | The core library.                                                                          |
+| `Eventuous.EventStoreDB`               | [Persistence](../persistence/_index.md) support for [EventStoreDB](https://eventstore.com) |
+| `Eventuous.EventStoreDB.Subscriptions` | Real-time subscriptions support for EventStoreDB                                           |
+| `Eventuous.Projections.MongoDB`        | Projections support for [MongoDB](https://www.mongodb.com/)                                |
 
 ### Quick Start - WIP
 
-{{< alert icon="👉" >}}
+{{< alert icon="️☢️" >}}
 The Quick Start is intended for intermediate to advanced users.
 {{< /alert >}}
 

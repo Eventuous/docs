@@ -2,14 +2,11 @@
 title: "Aggregate store"
 description: "Aggregate store"
 date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
 images: []
 menu:
   docs:
     parent: "persistence"
 weight: 320
-toc: true
 ---
 
 {{% alert icon="👉" %}}
@@ -34,20 +31,16 @@ Our [`ApplicationService`]({{< ref "app-service" >}}) uses the `AggregateStore` 
 
 Eventuous supports [EventStoreDB](https://eventstore.com) out of the box, but only v20+ with gRPC protocol.
 
-Using this pre-made event persistence is easy. You can register the necessary dependencies in your `Startup` class when using ASP.NET Core:
+Using this pre-made event persistence is easy. You can register the necessary dependencies in your startup code:
 
 ```csharp
-services.AddSingleton(new EventStoreClient(
+builder.Services.AddSingleton(new EventStoreClient(
     EventStoreClientSettings.Create(connectionString)
 ));
-services.AddSingleton<IEventSerializer>(
-    new DefaultEventSerializer(
-        new JsonSerializerOptions(JsonSerializerDefaults.Web)
-    )
-);
-services.AddSingleton<IEventStore, EsDbEventStore>();
-services.AddSingleton<IAggregateStore, AggregateStore>();
+services.AddAggregateStore<EsDbEventStore>();
 ```
+
+The `AddAggregateStore` extension is available in the `Eventuous.AspNetCore` NuGet package.
 
 {{% alert icon="👉" %}}
 Make sure to read about [events serialisation]({{< ref "serialisation">}}).

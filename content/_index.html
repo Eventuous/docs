@@ -1,0 +1,33 @@
++++
+title = "Eventuous"
+linkTitle = "Event Sourcing for .NET"
++++
+
+{{< blocks/cover title="Event Sourcing for .NET" image_anchor="top" height="max" color="primary" >}}
+<div class="mx-auto">
+	<a class="btn btn-lg btn-primary mr-3 mb-4" href="{{< relref "/docs" >}}">
+		Learn More <i class="fas fa-arrow-alt-circle-right ml-2"></i>
+	</a>
+	<p class="lead mt-5">Start building an event-sourced system, using the Event Sourcing community best practices and patterns.</p>
+</div>
+{{< /blocks/cover >}}
+
+{{% blocks/lead color="primary" %}}
+Eventuous includes the necessary building blocks for your domain model, persistence, real-time subscriptions, read model projections, and integration with events.
+{{% /blocks/lead %}}
+
+{{< blocks/section color="dark" >}}
+
+{{% blocks/feature icon="fas fa-sitemap" title="Domain" url="aggregate" %}}
+Event-sourced Aggregate base classes and Aggregate Store building blocks to build your domain model, and persist state transitions as events.
+{{% /blocks/feature %}}
+
+{{% blocks/feature icon="fas fa-rss" title="Subscriptions" url="subscriptions" %}}
+Real-time subscriptions to support event reactors and read model projections, using EventStoreDB, Google PubSub, and RabbitMQ.
+{{% /blocks/feature %}}
+
+{{% blocks/feature icon="fas fa-plug" title="EventStoreDB" ext_url="https://eventstore.com" url_text="Learn about EventStoreDB..." %}}
+Aggregate persistence, subscriptions, and event producers backed by EventStoreDB.
+{{% /blocks/feature %}}
+
+{{< /blocks/section >}}

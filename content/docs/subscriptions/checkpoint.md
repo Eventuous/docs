@@ -1,15 +1,12 @@
 ---
 title: "Checkpoints"
 description: "What's a checkpoint and why you need to store it"
-date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
+date: 2021-03-20
 images: []
 menu:
   docs:
     parent: "subscriptions"
 weight: 520
-toc: true
 ---
 
 When you subscribe to an event store, you need to decide what events you want to receive. A proper event store would allow you to subscribe to any event stream, or to a global stream (_All stream_), which contains all the events from the store, ordered by the time they were appended. Event-oriented brokers that support persistence as ordered event logs also support subscriptions, normally called _consumers_, as it's the publish-subscribe broker terminology.
@@ -22,12 +19,14 @@ As the subscription receives and processes events, it moves further along the st
 
 Some log-based brokers also use the term _offset_ to describe the checkpoint concept.
 
+Subscriptions, which are managed by the server, **don't require** storing checkpoints on the client side. For example, EventStoreDB persistent subscriptions and Google PubSub subscriptions don't require a client-side checkpoint store. Some subscriptions, like RabbitMQ subscription, don't have this concept at all, as RabbitMQ doesn't keep consumed messages, neither ACKed nor NACKed.
+
 ## Checkpoint store
 
 Eventuous provides an abstraction, which allows subscriptions to store checkpoints reliably. You can decide to store it in a file or in a database. You can also decide if you want to store a checkpoint after processing each event, or only flush it now and then. Periodical checkpoint flush decreases the pressure on the infrastructure behind the checkpoint store, but also requires you to make your subscription idempotent. It's usually hard or impossible for integration since you can rarely check if you published an event to a broker or not. However, it can work for read model projections.
 
-{{% alert icon="😱" %}}
-**Keep the checkpoint safe.** When the checkpoint is lost, the subscription will get all the events. It might be intentional when you are creating a brand new [read model]({{< ref "rm-concept" >}}), then it's okay. Otherwise, you get undesired consequences.
+{{% alert icon="😱" title="Keep the checkpoint safe" %}}
+When the checkpoint is lost, the subscription will get all the events. It might be intentional when you are creating a brand new [read model]({{< ref "rm-concept" >}}), then it's okay. Otherwise, you get undesired consequences.
 {{% /alert %}}
 
 The checkpoint store interface is simple, it only has two functions:
@@ -52,4 +51,11 @@ The `Checkpoint` record is a simple record, which aims to represent a stream pos
 record Checkpoint(string Id, ulong? Position);
 ```
 
-Out of the box, Eventuous provides a checkpoint store for MongoDB.
+Out of the box, Eventuous provides a checkpoint store for MongoDB. You can register it in your bootstrap code:
+
+```csharp
+builder.Services.AddSingleton<IMongoDatabase>(Mongo.ConfigureMongo());
+builder.Services.AddCheckpointStore<MongoCheckpointStore>();
+```
+
+The MongoDB checkpoint store will create a collection called `checkpoint` where it will keep one document per subscription.
