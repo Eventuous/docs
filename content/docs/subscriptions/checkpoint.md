@@ -51,4 +51,11 @@ The `Checkpoint` record is a simple record, which aims to represent a stream pos
 record Checkpoint(string Id, ulong? Position);
 ```
 
-Out of the box, Eventuous provides a checkpoint store for MongoDB.
+Out of the box, Eventuous provides a checkpoint store for MongoDB. You can register it in your bootstrap code:
+
+```csharp
+builder.Services.AddSingleton<IMongoDatabase>(Mongo.ConfigureMongo());
+builder.Services.AddCheckpointStore<MongoCheckpointStore>();
+```
+
+The MongoDB checkpoint store will create a collection called `checkpoint` where it will keep one document per subscription.

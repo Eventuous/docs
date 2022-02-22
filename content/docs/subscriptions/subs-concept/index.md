@@ -59,3 +59,21 @@ If the second operation fails, the command side of the application would remain 
 As mentioned, there are multiple issues of using a message bus as transport to deliver events to reporting models, but we won't be covering them on this page.
 
 The easiest way to solve the issue is to use a database which supports realtime subscriptions to event streams out of the box. That's why we use EventStoreDB as the primary event store implementation.
+
+## The right way
+
+It is not hard to avoid the two-phase commits and ensure to publish domain events reliably if you use a proper event store. The aim here would be to achieve the following architecture:
+
+{{< imgproc subscriptions.png Fill "800x525" >}}
+Consistent event flow
+{{< /imgproc >}}
+
+Why is this flow "consistent"? It's because the command handling process always finishes with an append operation towards event store (unless the command fails). There's no explicit `Publish` or `Produce` call that happens after the event is persisted. A proper event store should have a capability for to subscribe for getting all the new events when they appear in the store. As the `Append` operation of the event store is transactional, such a subscription will get the event only once, if it is capable to acknowledge the event correctly back to the subscription.
+
+Subscriptions have many purposes. Most often, you would use a subscription to project domain events to your query models ([read models]({{< ref "read-models" >}})). You can also use subscriptions to transform and publish integration events (see [Gateway]({{< ref "gateway" >}})).
+
+Subscriptions can also be used for integration purposes in combination with [Producers].
+
+## Implementation
+
+Eventuous implement subscriptions for different kinds of infrastructure (transport). As each transport is different, the way to configure them can be different, as well as the way subscriptions work. Read carefully the guidelines for each transport to understand what transport to use for your use case.

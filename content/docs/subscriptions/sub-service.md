@@ -27,18 +27,7 @@ All infrastructure-specific subscriptions inherit from `SubscriptionService` as 
 - Updating the checkpoint
 - Graceful shutdown
 
-## Service arguments
-
-The subscription service requires the following arguments:
-
-| Parameter name | Type | What's it for | Required |
-| -------------- | ---- | ------------- | -------- |
-| `subscriptionId` | `string` | Identifier to select event handlers, also used as a checkpoint id. | Yes |
-| `checkpointStore` | `ICheckpointStore` | [Checkpoint]({{< ref "checkpoint" >}}) store | Yes |
-| `eventSerializer` | `IEventSerializer` | Event [serializer]({{< ref "serialisation" >}}) | Yes |
-| `eventHandlers` | `IEnumerable<IEventHandler>` | List of event handlers | Yes |
-| `loggerFactory` | `ILoggerFactory?` | Microsoft logging logger factory instance | No |
-| `measure` | `ProjectionGapMeasure?` | Callback to report the [subscription gap](#mind-the-gap) | No |
+You'd normally use the DI container to register subscriptions with all the necessary handlers (described below).
 
 ## Event handlers
 
@@ -48,18 +37,79 @@ Each subscription service gets a list of event handlers. An event handler must i
 
 ```csharp
 public interface IEventHandler {
-    string SubscriptionGroup { get; }
-    Task HandleEvent(object evt, long? position);
+    string DiagnosticName { get; }
+    ValueTask<EventHandlingStatus> HandleEvent(IMessageConsumeContext context);
 }
 ```
 
-The `HandleEvent` function will be called by the subscription service for each event it receives. The event is already deserialized. The function also gets the event position in the stream. It might be used in projections to set some property of the read model. Using this property in queries will tell you if the projection is up to date.
+The `HandleEvent` function will be called by the subscription service for each event it receives. The event is already deserialized. The function also gets the event position in the stream. It might be used in projections to set some property of the read model. Using this property in queries will tell you if the projection is up-to-date.
 
 {{% alert icon="👻" color="warning" title="Event handler failures" %}}
-If an event handler throws, the whole subscription will fail. Such a failure will cause the subscription drop, and the subscription will resubscribe. If the error is caused by a poison event, which can never be handled, it will keep failing in a loop.
+If an event handler throws, the whole subscription will fail. Such a failure will cause the subscription drop, and the subscription will resubscribe. If the error is caused by a poison event, which can never be handled, it will keep failing in a loop. You can configure the subscription to ignore failures and continue by setting `ThrowIfError` property of `SubscriptionOptions` to `false`.
 {{% /alert %}}
 
-The interface also has the `SubscriptionGroup` property. It is used by the subscription to only select the relevant event handlers, as it might get all the handlers in the application (for example, if all the handlers are registered in the DI container). The subscription will _only_ serve those handlers, which have the `SubscriptionGroup` property value matching the subscription own `subscriptionName` argument value.
+The diagnostic name of the handler is used to distinguish logs in traces coming from a subscription per individual handler.
+
+### Consume context
+
+The subscription will invoke all its event handlers at once for each event received. Instead of just getting the event, the handler will get an instance of the message context (`IMessageConsumeContext` interface). The context contains the payload (event or other message) in its `Message` property, which has the type `object?`. It's possible to handle each event type differently by using pattern matching:
+
+```csharp
+public ValueTask<EventHandlingStatus> HandleEvent(IMessageConsumeContext ctx) {
+    return ctx.Message switch {
+        V1.RoomBooked => ...
+        _ => EventHandlingStatus.Ignored
+    };
+}
+```
+
+However, it's easier and more explicit to use pre-optimised base handlers. For read model projections you can use [Projections] handlers, described separately. For integration purposes you might want to use the [Gateway]({{< ref "gateway" >}}). For more generic needs, Eventuous offers the `EventHandler` base class. It allows specifying typed handlers for each of the event types that the handler processes:
+
+```csharp
+public class MyHandler : EventHandler {
+    public MyHandler(SmsService smsService) {
+        On<RoomBooked>(async ctx => await smsService.Send($"Room {ctx.Message.RoomId} booked!"));
+    } 
+}
+```
+
+The typed handler will get an instance of `MessageConsumeContext<T>` where `T` is the message type. There, you can access the message using the `Message` property without casting it.
+
+### Handling result
+
+The handler needs to return the handling status. It's preferred to return the error status `EventHandlingStatus.Failure` instead of throwing an exception. When using the `EventHandler` base class, if the event handling function throws an exception, the handler will return the failure status and not float the exception back to the subscription.
+
+The status is important for diagnostic purposes. For example, you don't want to trace event handlers for events that are ignored. That's why when you don't want to process the event, you need to return `EventHandlingStatus.Ignored`. The `EventHandler` base class will do it automatically if it gets an event that has no registered handler.
+
+When the event is handled successfully (neither failed nor ignored), the handler needs to return `EventHandlingStatus.Success`. Again, the `EventHandler` base class will do it automatically if the registered handler doesn't throw.
+
+The subscription will acknowledge the event only if all of its handlers _don't fail_. How subscriptions handle failures depends on the transport type.
+
+## Registration
+
+As mentioned before, you'd normally register subscriptions using the DI extensions provided by Eventuous:
+
+```csharp
+builder.Services.AddSubscription<StreamSubscription, StreamSubscriptionOptions>(
+    "PaymentIntegration",
+    builder => builder
+        .Configure(x => x.StreamName = PaymentsIntegrationHandler.Stream)
+        .AddEventHandler<PaymentsIntegrationHandler>()
+);
+```
+
+The `AddSubscription` extension needs two generic arguments: subscription implementation and its options. Every implementation has its own options as the options configure the particular subscription transport.
+
+The first parameter for `AddSubscription` is the subscription name. It must be unique within the application scope. Eventuous uses the subscription name to separate one subscription from another, along with their options and other things. The subscription name is also used in diagnostics as a tag.
+
+Then, you need to specify how the subscription builds. There are two most used functions in the builder:
+
+- `Configure`: allows to change the subscription options
+- `AddEventHandler<T>`: adds an event handler to the subscription
+
+You can add several handlers to the subscription, and they will always "move" together throw the events stream or topic. If any of the handlers fail, the subscription might fail, so it's "all or nothing" strategy.
+
+Eventuous uses the consume pipe, where it's possible to add filters (similar to [MassTransit](http://masstransit-project.com)). You won't need to think about it in most of the cases, but you can read mode in the [Pipes and filters]({{< ref "pipes">}}) section.
 
 ## Subscription drops
 
@@ -68,6 +118,8 @@ A subscription could drop for different reasons. For example, it fails to pass t
 The subscription service handles such drops and issues a resubscribe request, unless the application is shutting down, so the drop is deliberate.
 
 This feature makes the subscription service resilient to transient failures, so it will recover from drops and continue processing events, when possible.
+
+You can configure the subscription to ignore failures and continue by setting `ThrowIfError` property of `SubscriptionOptions` to `false`.
 
 ## Mind the gap
 
@@ -79,27 +131,27 @@ The easiest way to detect such situations is to observe the gap between the last
 If the gap increases continuously, your subscription is not catching up with all the events it receives. You need to set up a proper metric for the gap, and trigger an alert if the gap exceeds the value you can tolerate.
 {{% /alert %}}
 
-The gap is measured by supplying a `SubscriptionGapMeasure` instance, which has a function that you can use for your metric:
+The gap is measured by subscriptions that implement the `IMeasuredSubscription` interface:
 
 ```csharp
-public ulong GetGap(string checkpointId) => _gaps[checkpointId];
+public interface IMeasuredSubscription {
+    GetSubscriptionGap GetMeasure();
+}
 ```
 
-You only need a single instance of the `SubscriptionGapMeasure` in the application, as it handles multiple subscriptions. The `checkpointId` there has the same value as the `subscriptionName`. The gap is measured once per second.
+Subscription gaps are collected as metrics. Read more about Eventuous metrics in the [Diagnostics] section.
 
 ## Health checks
 
 The subscription service class also implements the `IHealthCheck` interface. Therefore, it can be used for [ASP.NET Core health monitoring](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-5.0).
 
-For example, you can register your subscription as a hosted service, and then add it to the health check configuration:
+When using Eventuous dependency injection extensions, each registered subscription will also register its health checks.
+
+However, you need to register the global Eventuous subscriptions health check by adding one line to the ASP.NET Core health checks registration:
 
 ```csharp
-services.AddHostedService<MySubscription>();
-services.AddHealthChecks().AddCheck<MySubscriptionService>();
+builder.Services
+  .AddHealthChecks()
+  .AddSubscriptionsHealthCheck("subscriptions", HealthStatus.Unhealthy, new []{"tag"});
 ```
 
-In addition, Eventuous provides a helper registration method for the DI container, which does both. You can also supply the health name and tags for each subscription:
-
-```csharp
-services.AddSubscription<MySubscriptionService>("state-update", new[] {"esdb"});
-```

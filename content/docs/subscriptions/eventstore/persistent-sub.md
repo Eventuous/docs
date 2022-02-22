@@ -1,5 +1,5 @@
 ---
-title: "Persisted subscription"
+title: "Persistent subscription"
 date: 2021-04-28
 images: []
 description: >

@@ -20,5 +20,13 @@ Although the `AllStreamSubscriptionService` class is not abstract, we do not rec
 
 WIP
 
-
+```csharp
+builder.Services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
+    "BookingsProjections",
+    builder => builder
+        .AddEventHandler<BookingStateProjection>()
+        .AddEventHandler<MyBookingsProjection>()
+        .WithPartitioningByStream(2)
+);
+```
 
