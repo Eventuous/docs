@@ -74,12 +74,20 @@ The measured store is used by default if Eventuous diagnostics aren't disabled, 
 
 ## Checkpoint commit handler
 
-In addition to checkpoint store, Eventuous has a more advanced way to work with checkpoints. It doesn't load or store checkpoints by itself, for that purpose it uses the provided checkpoint store. However, the commit handler is able to receive a stream of unordered checkpoints, reorder them, detect possible gaps, and only store the checkpoint that is the earliest before the gap.
+In addition to checkpoint store, Eventuous has a more advanced way to work with checkpoints. It doesn't load or store checkpoints by itself, for that purpose it uses the provided checkpoint store. However, the commit handler is able to receive a stream of unordered checkpoints, reorder them, detect possible gaps, and only store the checkpoint that is the latest before the gap.
 
 For subscriptions that support delayed consume (see [Partitioning filter]({{< ref "pipes#partitioning-filter" >}})) and require a checkpoint store, you must use the commit handler. All such subscription types provided by Eventuous use the checkpoint commit handler.
 
 Unless you create your own subscription with such requirements, you don't need to know the internals of the commit handler. However, you would benefit to know the consequences of delayed event processing with supported subscriptions.
 
-When events get partitioned by the filter, several consumer instances process events in parallel. As a result, each partition will get checkpoints with gaps. When partitioned consumers process events, they run at different speed. Each event inside `DelayedConsumeContext` is explicitly acknowledged, and when it happens, the checkpoint gets to the commit handler queue. The commit handler then is able to accumulate checkpoints, detect gaps in the sequence, and only store the earliest checkpoint in a gap-less sequence.
+When events get partitioned by the filter, several consumer instances process events in parallel. As a result, each partition will get checkpoints with gaps. When partitioned consumers process events, they run at different speed. Each event inside `DelayedConsumeContext` is explicitly acknowledged, and when it happens, the checkpoint gets to the commit handler queue. The commit handler then is able to accumulate checkpoints, detect gaps in the sequence, and only store the latest checkpoint in a gap-less sequence.
+
+{{< imgproc commit-handler.png Resize "1100x366" >}}
+Gap in the commit handler queue
+{{< /imgproc >}}
+
+{{% alert icon="👉" %}}
+On the illustration above, the commit queue has a gap, and event **95** is still in-flight. As soon as the event **95** is processed, its position will get to the queue, the commit handler will detect a gap-less sequence, and commit the checkpoint **97**.
+{{%/ alert %}}
 
 As we talk about gaps, you might face a situation when the commit handler has a list of uncommitted checkpoints with gaps, and the application stops. When this happens, some events were already processed, whilst checkpoints for those events remain in-flight. When the application restarts, it loads the checkpoint that points to some position in the stream that is _earlier_ than positions of already processed events. Because of that, some events will be processed by event handlers _again_. Therefore, you need to make sure that your event handlers are _idempotent_, so when the same events are processed again, the result of the processing won't create any undesired side effects.
