@@ -75,6 +75,8 @@ public class MyHandler : EventHandler {
 
 The typed handler will get an instance of `MessageConsumeContext<T>` where `T` is the message type. There, you can access the message using the `Message` property without casting it.
 
+A subscription will invoke a single consumer and give it an instance of the consume context. The consumer's job is to handle the message by invoking all the registered handlers. By default, Eventuous uses the `DefaultConsumer`, unless specified otherwise when registering the subscription. The `IMessageConsumeContext` interface has functions to acknowledge (ACK), not acknowledge (NACK), or ignore the message. The default consumer Acks the message when all the handlers processed the message without failures, and at least one handler didn't ignore the message. It Nacks the message if any handler returned an error or crashed. Finally, it will ignore the message if all the handlers ignored it. How the message handling result is processed is unknown to the consumer as this behaviour is transport-specific. Each subscription type has its own way to process the message handling result.
+
 ### Handling result
 
 The handler needs to return the handling status. It's preferred to return the error status `EventHandlingStatus.Failure` instead of throwing an exception. When using the `EventHandler` base class, if the event handling function throws an exception, the handler will return the failure status and not float the exception back to the subscription.

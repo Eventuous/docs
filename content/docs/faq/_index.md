@@ -1,7 +1,6 @@
 ---
 title: "FAQ"
-date: 2021-03-20
-weight: 900
+weight: 2000
 images: []
 description: >
   Frequently asked questions.
