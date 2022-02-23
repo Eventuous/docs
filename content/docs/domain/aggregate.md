@@ -194,3 +194,5 @@ AggregateFactoryRegistry.CreateAggregateUsing(() => new Booking(availabilityServ
 ```
 
 By default, when there's no custom factory registered in the registry for a particular aggregate type, Eventuous will create new aggregate instances by using reflections. It will only work when the aggregate class has a parameterless constructor (it's provided by the `Aggregate` base class).
+
+It's not a requirement to use the default factory registry singleton. Both `ApplicationService` and `AggregateStore` have an optional parameter that allows you to provide the registry as a dependency. When not provided, the default instance will be used. If you use a custom registry, you can add it to the DI container as singleton.
