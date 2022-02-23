@@ -1,6 +1,6 @@
 ---
 title: "Consume pipe"
-description: "Subscription consume pipes and fitlers"
+description: "Subscription consume pipes and filters"
 images: []
 menu:
   docs:

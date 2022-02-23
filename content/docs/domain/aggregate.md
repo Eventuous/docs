@@ -196,3 +196,22 @@ AggregateFactoryRegistry.CreateAggregateUsing(() => new Booking(availabilityServ
 By default, when there's no custom factory registered in the registry for a particular aggregate type, Eventuous will create new aggregate instances by using reflections. It will only work when the aggregate class has a parameterless constructor (it's provided by the `Aggregate` base class).
 
 It's not a requirement to use the default factory registry singleton. Both `ApplicationService` and `AggregateStore` have an optional parameter that allows you to provide the registry as a dependency. When not provided, the default instance will be used. If you use a custom registry, you can add it to the DI container as singleton.
+
+### Dependency injection
+
+The aggregate factory can inject registered dependencies to aggregates when constructing them. For this to work, you need to tell Eventuous that the aggregate needs to be constructed using the container. To do so, use the `AddAggregate<T>` service collection extension:
+
+```csharp
+builder.Services.AddAggregate<Booking>();
+builder.Services.AddAggregate<Payment>(
+    sp => new Payment(sp.GetRequiredService<PaymentProcessor>, otherService)
+);
+```
+
+When that's done, you also need to tell the host to use the registered factories:
+
+```csharp
+app.UseAggregateFactory();
+```
+
+These extensions are available in the `Eventuous.AspNetCore` (DI extensions and `IApplicationBuilder` extensions) and `Eventuous.AspNetCore.Web` (`IHost` extensions).
