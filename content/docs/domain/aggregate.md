@@ -39,7 +39,7 @@ Those entities might also have behaviour, but to reach out to an entity within a
 
 ```csharp
 var booking = bookingRepository.Load(bookingId);
-booling.CancelExtraService(extraServiceId);
+booking.CancelExtraService(extraServiceId);
 bookingRepository.Save(booking);
 ```
 
@@ -66,12 +66,12 @@ Eventuous provides three abstract classes for the `Aggregate` pattern, which are
 
 The `Aggregate` abstract class is quite technical and provides very little out of the box.
 
-| Member | Kind | What it's for |
-| ------ | ---- | ------------- |
-| `Changes` | Read-only collection | Events, which represent new state changes, get added here |
-| `ClearChanges` | Method | Clears the changes collection |
-| `Version` | Property, `int` | Current aggregate version, used for optimistic concurrency. Default is `-1` |
-| `AddChange` | Method | Adds an event to the list of changes |
+| Member         | Kind                 | What it's for                                                               |
+|----------------|----------------------|-----------------------------------------------------------------------------|
+| `Changes`      | Read-only collection | Events, which represent new state changes, get added here                   |
+| `ClearChanges` | Method               | Clears the changes collection                                               |
+| `Version`      | Property, `int`      | Current aggregate version, used for optimistic concurrency. Default is `-1` |
+| `AddChange`    | Method               | Adds an event to the list of changes                                        |
 
 It also has two helpful methods, which aren't related to Event Sourcing:
 - `EnsureExists` - throws if `Version` is `-1`
@@ -79,11 +79,11 @@ It also has two helpful methods, which aren't related to Event Sourcing:
 
 All other members are methods. You either need to implement them, or use one of the derived classes (see below).
 
-| Member | What it's for |
-| ------ | ------------- |
-| `Load` | Given the list of previously stored events, restores the aggregate state. Normally, it's used for synchronous load, when all the stored events come from event store at once. |
-| `Fold` | Applies a single state transition event to the aggregate state and increases the version. Normally, it's used for asynchronous loads, when events come from event store one by one. |
-| `GetId` | Returns the aggregate identity as `string`. As most databases support string identity, it's the most generic type to support persistence. |
+| Member  | What it's for                                                                                                                                                                       |
+|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Load`  | Given the list of previously stored events, restores the aggregate state. Normally, it's used for synchronous load, when all the stored events come from event store at once.       |
+| `Fold`  | Applies a single state transition event to the aggregate state and increases the version. Normally, it's used for asynchronous loads, when events come from event store one by one. |
+| `GetId` | Returns the aggregate identity as `string`. As most databases support string identity, it's the most generic type to support persistence.                                           |
 
 When building an application, you'd not need to use the `Aggregate` abstract class as-is. You still might want to use it to implement some advanced scenarios.
 
@@ -95,10 +95,10 @@ The aggregate state in Eventuous is _immutable_. When applying an event to it, w
 
 The stateful aggregate class implements most of the abstract members of the original `Aggregate`. It exposes an API, which allows you to use the stateful aggregate base class directly.
 
-| Member | Kind | What it's for |
-| ------ | ---- | ------------- |
-| `Apply` | Method | Given a domain event, applies it to the state. Replaces the current state with the new version. Adds the event to the list of changes. Returns a tuple with the previous and the current state versions. |
-| `State` | Property | Returns the current aggregate state. |
+| Member  | Kind     | What it's for                                                                                                                                                                                            |
+|---------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Apply` | Method   | Given a domain event, applies it to the state. Replaces the current state with the new version. Adds the event to the list of changes. Returns a tuple with the previous and the current state versions. |
+| `State` | Property | Returns the current aggregate state.                                                                                                                                                                     |
 
 As we don't know how to extract the aggregate identity from this implementation, you still need to implement the `GetId` function.
 
@@ -176,3 +176,21 @@ class Booking : Aggregate<BookingState, BookingId> {
     }
 }
 ```
+
+## Aggregate factory
+
+Eventuous needs to instantiate your aggregates when it loads them from the store. New instances are also created by the `ApplicationService` when handling a command that operates on a new aggregate. Normally, aggregate classes don't have dependencies, so it is possible to instantiate one by calling its default constructor. However, you might need to have a dependency or two, like a domain service. We advise providing such dependencies when calling the aggregate function from the application service, as an argument. But it's still possible to instruct Eventuous how to construct aggregates that don't have a default parameterless constructor. That's the purpose of the `AggregateFactory` and `AggregateFactoryRegistry`.
+
+The `AggregateFactory` is a simple function:
+
+```csharp
+public delegate T AggregateFactory<out T>() where T : Aggregate;
+```
+
+The registry allows you to add custom factory for a particular aggregate type. The registry itself is a singleton, accessible by `AggregateFactoryRegistry.Instance`. You can register your custom factory by using the `CreateAggregateUsing<T>` method of the registry:
+
+```csharp
+AggregateFactoryRegistry.CreateAggregateUsing(() => new Booking(availabilityService));
+```
+
+By default, when there's no custom factory registered in the registry for a particular aggregate type, Eventuous will create new aggregate instances by using reflections. It will only work when the aggregate class has a parameterless constructor (it's provided by the `Aggregate` base class).
