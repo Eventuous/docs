@@ -29,6 +29,8 @@ Eventuous provides an abstraction, which allows subscriptions to store checkpoin
 When the checkpoint is lost, the subscription will get all the events. It might be intentional when you are creating a brand new [read model]({{< ref "rm-concept" >}}), then it's okay. Otherwise, you get undesired consequences.
 {{% /alert %}}
 
+### Abstraction
+
 The checkpoint store interface is simple, it only has two functions:
 
 ```csharp
@@ -51,7 +53,11 @@ The `Checkpoint` record is a simple record, which aims to represent a stream pos
 record Checkpoint(string Id, ulong? Position);
 ```
 
-Out of the box, Eventuous provides a checkpoint store for MongoDB. You can register it in your bootstrap code:
+### Available stores
+
+If a supported projection type in an Eventuous package for projections (`Eventuous.Projections.*`) requires a checkpoint store, you can find its implementation in that package. For example, the `Eventuous.Projections.MongoDB` package has a checkpoint store implementation for MongoDB.
+
+If you register subscriptions in the DI container, you also need to register the checkpoint store:
 
 ```csharp
 builder.Services.AddSingleton<IMongoDatabase>(Mongo.ConfigureMongo());
@@ -59,3 +65,21 @@ builder.Services.AddCheckpointStore<MongoCheckpointStore>();
 ```
 
 The MongoDB checkpoint store will create a collection called `checkpoint` where it will keep one document per subscription.
+
+In addition to that, Eventuous has two implementations in the core subscriptions package:
+- `MeasuredCheckpointStore`: creates a trace for all the IO operations, wraps an existing store
+- `NoOpCheckpointStore`: does nothing, used in Eventuous tests
+
+The measured store is used by default if Eventuous diagnostics aren't disabled, and you use the `AddCheckpointStore` container registration extension.
+
+## Checkpoint commit handler
+
+In addition to checkpoint store, Eventuous has a more advanced way to work with checkpoints. It doesn't load or store checkpoints by itself, for that purpose it uses the provided checkpoint store. However, the commit handler is able to receive a stream of unordered checkpoints, reorder them, detect possible gaps, and only store the checkpoint that is the earliest before the gap.
+
+For subscriptions that support delayed consume (see [Partitioning filter]({{< ref "pipes#partitioning-filter" >}})) and require a checkpoint store, you must use the commit handler. All such subscription types provided by Eventuous use the checkpoint commit handler.
+
+Unless you create your own subscription with such requirements, you don't need to know the internals of the commit handler. However, you would benefit to know the consequences of delayed event processing with supported subscriptions.
+
+When events get partitioned by the filter, several consumer instances process events in parallel. As a result, each partition will get checkpoints with gaps. When partitioned consumers process events, they run at different speed. Each event inside `DelayedConsumeContext` is explicitly acknowledged, and when it happens, the checkpoint gets to the commit handler queue. The commit handler then is able to accumulate checkpoints, detect gaps in the sequence, and only store the earliest checkpoint in a gap-less sequence.
+
+As we talk about gaps, you might face a situation when the commit handler has a list of uncommitted checkpoints with gaps, and the application stops. When this happens, some events were already processed, whilst checkpoints for those events remain in-flight. When the application restarts, it loads the checkpoint that points to some position in the stream that is _earlier_ than positions of already processed events. Because of that, some events will be processed by event handlers _again_. Therefore, you need to make sure that your event handlers are _idempotent_, so when the same events are processed again, the result of the processing won't create any undesired side effects.
