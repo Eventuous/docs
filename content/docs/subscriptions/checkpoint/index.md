@@ -1,8 +1,6 @@
 ---
 title: "Checkpoints"
 description: "What's a checkpoint and why you need to store it"
-date: 2021-03-20
-images: []
 menu:
   docs:
     parent: "subscriptions"
