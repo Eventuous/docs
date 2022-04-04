@@ -21,7 +21,7 @@ You'd normally use the DI container to register subscriptions with all the neces
 
 ## Event handlers
 
-As mentioned on the [Concept]({{< ref "subs-concept" >}}) page, one subscription might serve multiple event handlers, such as projections. It is especially relevant to keep a group of projections in sync, so they don't produce inconsistent [read models]({{ ref "rm-concepts" }}).
+As mentioned on the [Concept]({{< ref "subs-concept" >}}) page, one subscription might serve multiple event handlers, such as projections. It is especially relevant to keep a group of projections in sync, so they don't produce inconsistent [read models]({{< ref "read-models" >}}).
 
 Each subscription service gets a list of event handlers. An event handler must implement the `IEventHandler` interface, which has two members:
 

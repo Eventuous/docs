@@ -1,7 +1,7 @@
 ---
 title: "Diagnostics"
 description: "Monitoring subscriptions"
-weight: 526
+weight: 528
 toc: true
 ---
 
@@ -71,6 +71,30 @@ eventuous_subscription_duration_ms_bucket{message_type="V1.RoomBooked",partition
 eventuous_subscription_duration_ms_sum{message_type="V1.RoomBooked",partition="0",subscription_id="BookingsProjections"} 50.429 1649081749067
 eventuous_subscription_duration_ms_count{message_type="V1.RoomBooked",partition="0",subscription_id="BookingsProjections"} 1 1649081749067
 ```
+
+## Subscription tracing
+
+Each part of the subscription event processing [pipeline]({{< ref "pipes" >}}) is traced. Each event is wrapped into a consume context by the subscription, then passed to the consumer. The consumer then calls all the event handlers.
+
+{{<mermaid>}}
+graph LR;
+    Subscription --> Consumer
+    Consumer --> B1[Handler 1]
+    Consumer --> B2[Handler 2]
+    Consumer --> B3[Handler 3]
+{{</mermaid>}}
+
+As all Eventuous producers and event store(s) are instrumented, they propagate the trace context to the subscription. The subscription then propagates the trace context to the consumer, and the consumer then propagates the trace context to the event handlers, so all these operations are traced.
+
+Here's an example of the trace context propagated to the subscription visualised by Zipkin:
+
+{{< imgproc sub-trace.png Fill "1000x300" >}}
+Subscription trace
+{{< /imgproc >}}
+
+As you can see, event handlers for the `BookingProjection` subscription are projections, and trigger updates in MongoDB, which are also traced because the sample application is instrumented by MongoDB tracing library.
+
+As mentioned before, Eventuous ensures that the tracing context is propagated also remotely, so you get the full trace even if the subscription is running in a different process.
 
 ## Health checks
 
