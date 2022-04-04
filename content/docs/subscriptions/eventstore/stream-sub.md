@@ -30,15 +30,17 @@ builder.Services.AddSubscription<StreamSubscription, StreamSubscriptionOptions>(
 
 Subscription options for `StreamSubscription` are defined in `StreamSubscriptionOptions` class.
 
-* `SubscriptionId` - unique subscription identifier.
-* `StreamName` - name of the stream to subscribe to.
-* `ThrowOnError` - if `true`, an exception will be thrown if the subscription fails, otherwise the subscription continues to run. Default is `false`.
-* `EventSerilizer` - serializer for events, if `null` the default serializer will be used.
-* `MetadataSerilizer` - serializer for metadata, if `null` the default serializer will be used.
-* `Credentials` - EventStoreDB user credentials. If not specified, the credentials specified in the `EventStoreClientSettings` will be used.
-* `ResolveLinkTos` - if `true`, the subscription will automatically resolve the event link to the event that caused the event. Default is `false`.
-* `IgnoreSystemEvents` - set to true to ignore system events. Default is `true`.
-* `ConcurrencyLimit` - maximum number of events to be processed in parallel. Default is `1`.
+| Option               | Description                                                                                                                        |
+|:---------------------|:-----------------------------------------------------------------------------------------------------------------------------------|
+| `SubscriptionId`     | Unique subscription identifier.                                                                                                    |
+| `StreamName`         | Name of the stream to subscribe to.                                                                                                |
+| `ThrowOnError`       | If `true`, an exception will be thrown if the subscription fails, otherwise the subscription continues to run. Default is `false`. |
+| `EventSerilizer`     | Serializer for events, if `null` the default serializer will be used.                                                              |
+| `MetadataSerilizer`  | Serializer for metadata, if `null` the default serializer will be used.                                                            |
+| `Credentials`        | EventStoreDB user credentials. If not specified, the credentials specified in the `EventStoreClientSettings` will be used.         |
+| `ResolveLinkTos`     | If `true`, the subscription will automatically resolve the event link to the event that caused the event. Default is `false`.      |
+| `IgnoreSystemEvents` | Set to true to ignore system events. Default is `true`.                                                                            |
+| `ConcurrencyLimit`   | Maximum number of events to be processed in parallel. Default is `1`.                                                              |
 
 {{% alert icon="👉" %}}
 At the bare minimum, you must define the stream name in the subscription options.

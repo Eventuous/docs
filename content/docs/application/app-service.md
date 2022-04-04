@@ -26,7 +26,7 @@ The command service itself performs the following operations when handling one c
 5. The aggregate either performs the operation and changes its state by producing new events, or rejects the operation.
 6. If the operation was successful, the service persists new events to the store. Otherwise, it returns a failure to the edge.
 
-{{% alert icon="⁉️" title="Command handling errors" color="warning" %}}
+{{% alert icon="⁉️" title="Command-handling errors" color="warning" %}}
 The last point above translates to: the application service **does not throw exceptions**. It [returns](#result) an instance of `ErrorResult` instead. It is your responsibility to handle the error.
 
 {{%/ alert %}}
