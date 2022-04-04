@@ -1,28 +1,21 @@
 ---
-title: "Subscription service"
-description: "Base class for subscriptions"
+title: "Subscription base"
+description: "How Eventuous subscriptions work"
 images: []
-menu:
-  docs:
-    parent: "subscriptions"
 weight: 525
 toc: true
 ---
 
-Eventuous implements all subscription types as hosted services. It's because subscriptions need to start when the application starts, work in background when the application is running, then shut down when the application stops.
+The base abstract class for subscriptions is the `IMessageSubscription` interface, but all the available subscriptions are based on the `EventSubscription` base class, which is a generic abstract class where its type parameter is the subscription options type. All the provided subscription options types inherit from the `SubscriptionOptions` base class.
 
-Eventuous has a `SubscriptionService` base class. It aims to support a variety of scenarios, using a real-time message delivery infrastructure to feed message handlers (could be events or commands).
+The `SubscriptionOptions` base class has three properties:
+* `SubscriptionId`: a unique identifier for the subscription
+* `ThrowOnError`: a boolean indicating whether the subscription should throw an exception if an error occurs. When the subscription throws, it either NACKs the message, or stops the subscription depending on the implementation.
+* `EventSerializer`: an instance of the `IEventSerializer` interface, which is used to serialize and deserialize events. If not provided, the default serializer is used.
 
-All infrastructure-specific subscriptions inherit from `SubscriptionService` as it handles most of the subscription mechanics, such as:
+Each provided subscription options type has more options, which depend on the subscription implementation details.
 
-- Selecting event handlers, which the subscription will serve
-- Reading the last known [checkpoint]({{< ref "checkpoint" >}})
-- Subscribing (this one is delegated to the implementation)
-- Handling eventual [subscription drops](#subscription-drops) and resubscribes
-- Measuring the [subscription gap](#mind-the-gap)
-- Reporting the [subscription health](#health-checks)
-- Updating the checkpoint
-- Graceful shutdown
+To host a subscription and manage its lifecycle, Eventuous has a hosted service called `SubscriptionHostedService`. Each registered subscription gets its own hosted service, so that each subscription can be managed independently. When using Eventuous subscription registration extensions for the DI container, the hosted service is registered automatically.
 
 You'd normally use the DI container to register subscriptions with all the necessary handlers (described below).
 
@@ -46,6 +39,8 @@ If an event handler throws, the whole subscription will fail. Such a failure wil
 {{% /alert %}}
 
 The diagnostic name of the handler is used to distinguish logs in traces coming from a subscription per individual handler.
+
+Normally Eventuous uses either the `BaseEventHandler` abstract base class. For specific implementations, you'd either use a built-in handler provided by a projection (like MongoDB projection), or the `EventHandler` abstract base class.
 
 ### Consume context
 
@@ -72,7 +67,7 @@ public class MyHandler : EventHandler {
 
 The typed handler will get an instance of `MessageConsumeContext<T>` where `T` is the message type. There, you can access the message using the `Message` property without casting it.
 
-A subscription will invoke a single consumer and give it an instance of the consume context. The consumer's job is to handle the message by invoking all the registered handlers. By default, Eventuous uses the `DefaultConsumer`, unless specified otherwise when registering the subscription. The `IMessageConsumeContext` interface has functions to acknowledge (ACK), not acknowledge (NACK), or ignore the message. The default consumer Acks the message when all the handlers processed the message without failures, and at least one handler didn't ignore the message. It Nacks the message if any handler returned an error or crashed. Finally, it will ignore the message if all the handlers ignored it. How the message handling result is processed is unknown to the consumer as this behaviour is transport-specific. Each subscription type has its own way to process the message handling result.
+A subscription will invoke a single consumer and give it an instance of the consume context. The consumer's job is to handle the message by invoking all the registered handlers. By default, Eventuous uses the `DefaultConsumer`, unless specified otherwise when registering the subscription. The `IMessageConsumeContext` interface has functions to acknowledge (ACK), not acknowledge (NACK), or ignore the message. The default consumer ACKs the message when all the handlers processed the message without failures, and at least one handler didn't ignore the message. It NACKs the message if any handler returned an error or crashed. Finally, it will ignore the message if all the handlers ignored it. How the message handling result is processed is unknown to the consumer as this behaviour is transport-specific. Each subscription type has its own way to process the message handling result.
 
 ### Handling result
 
@@ -119,38 +114,4 @@ The subscription service handles such drops and issues a resubscribe request, un
 This feature makes the subscription service resilient to transient failures, so it will recover from drops and continue processing events, when possible.
 
 You can configure the subscription to ignore failures and continue by setting `ThrowIfError` property of `SubscriptionOptions` to `false`.
-
-## Mind the gap
-
-When using subscriptions for read model projections, you enter to the world of [CQRS](https://zimarev.com/blog/event-sourcing/cqrs/) and asynchronous messaging. After completing a transaction in the domain model, one or more events are added to the event store. Then, a subscription picks it up and calls a projection. Although in most cases you'll see only a few milliseconds delay between these operations, if your projection becomes slow (for example, it uses a slow database), the processing time will increase.
-
-The easiest way to detect such situations is to observe the gap between the last event in the stream, which the subscription listens to, and the event, which is currently being processed. We call it the **subscription gap**.
-
-{{% alert icon="☎️" color="warning" title="Alerting for the gap" %}}
-If the gap increases continuously, your subscription is not catching up with all the events it receives. You need to set up a proper metric for the gap, and trigger an alert if the gap exceeds the value you can tolerate.
-{{% /alert %}}
-
-The gap is measured by subscriptions that implement the `IMeasuredSubscription` interface:
-
-```csharp
-public interface IMeasuredSubscription {
-    GetSubscriptionGap GetMeasure();
-}
-```
-
-Subscription gaps are collected as metrics. Read more about Eventuous metrics in the [Diagnostics] section.
-
-## Health checks
-
-The subscription service class also implements the `IHealthCheck` interface. Therefore, it can be used for [ASP.NET Core health monitoring](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-5.0).
-
-When using Eventuous dependency injection extensions, each registered subscription will also register its health checks.
-
-However, you need to register the global Eventuous subscriptions health check by adding one line to the ASP.NET Core health checks registration:
-
-```csharp
-builder.Services
-  .AddHealthChecks()
-  .AddSubscriptionsHealthCheck("subscriptions", HealthStatus.Unhealthy, new []{"tag"});
-```
 
