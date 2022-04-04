@@ -34,7 +34,7 @@ Subscription options for `AllStreamSubscription` are defined in `AllStreamSubscr
 * `ResolveLinkTos` - if `true`, the subscription will automatically resolve the event link to the event that caused the event. Default is `false`.
 * `ConcurrencyLimit` - maximum number of events to be processed in parallel. Default is `1`.
 * `EventFilter` - filter for events, if `null`, the subscription will filter out system events.
-* `CheckpointInterval` - interval between checkpoints. Default is `10` events.
+* `CheckpointInterval` - interval between checkpoints when event filter is used. Default is `10` events. This interval tells the subscription to report the current checkpoint when the subscription doesn't receive any events for this interval because all the events were filtered out.
 
 ### Checkpoint store
 
@@ -52,7 +52,7 @@ builder.Services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOpt
 
 ### Concurrent event handlers
 
-As any catch-up subscription, subscription to all runs sequentially, processing events one by one. In many cases that's enough, but sometimes you might want to speed it up, and allow parallel processing of events. To do that, you need to set the `ConcurrencyLimit` subscription option property to a value that is equal to the number of events being processed in parallel. In addition, you need to tell the subscription how to distribute events into partitions. That is needed as you rarely can tolerate processing events in a completely random order, so you can partition events using some key, and distribute them to different partitions.
+As any catch-up subscription, subscription to `$all` runs sequentially, processing events one by one. In many cases that's enough, but sometimes you might want to speed it up, and allow parallel processing of events. To do that, you need to set the `ConcurrencyLimit` subscription option property to a value that is equal to the number of events being processed in parallel. In addition, you need to tell the subscription how to distribute events into partitions. That is needed as you rarely can tolerate processing events in a completely random order, so you can partition events using some key, and distribute them to different partitions.
 
 Here is an example of using `AllStreamSubscription` with `ConcurrencyLimit` and partitioning by stream name:
 

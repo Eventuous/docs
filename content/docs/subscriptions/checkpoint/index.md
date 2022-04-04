@@ -1,9 +1,6 @@
 ---
 title: "Checkpoints"
 description: "What's a checkpoint and why you need to store it"
-menu:
-  docs:
-    parent: "subscriptions"
 weight: 520
 ---
 

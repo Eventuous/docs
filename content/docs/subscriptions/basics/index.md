@@ -1,9 +1,7 @@
 ---
 title: "Subscription base"
 description: "How Eventuous subscriptions work"
-images: []
 weight: 525
-toc: true
 ---
 
 The base abstract class for subscriptions is the `IMessageSubscription` interface, but all the available subscriptions are based on the `EventSubscription` base class, which is a generic abstract class where its type parameter is the subscription options type. All the provided subscription options types inherit from the `SubscriptionOptions` base class.
