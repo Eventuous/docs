@@ -1,7 +1,7 @@
 ---
 title: "Diagnostics"
 description: "Monitoring subscriptions"
-weight: 528
+weight: 529
 toc: true
 ---
 
