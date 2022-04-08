@@ -1,13 +1,6 @@
 ---
 title: "Aggregate stream"
 description: "Aggregate as a stream of events"
-date: 2021-04-08
-lastmod: 2021-04-08
-draft: false
-images: []
-menu:
-  docs:
-    parent: "persistence"
 weight: 310
 toc: true
 ---
