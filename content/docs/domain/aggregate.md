@@ -110,7 +110,13 @@ We have an abstraction for the aggregate state. It might seem unnecessary, but i
 
 To support state immutability, `AggregateState` is an abstract _record_, not class. Therefore, it supports immutability out of the box and supports `with` syntax to make state transitions easier.
 
-A record, which inherits from `AggregateState` needs to implement a single function called `When`. It gets an event as an argument and returns the new state instance. For example:
+A record, which inherits from `AggregateState` needs to implement a single function called `When`. It gets an event as an argument and returns the new state instance. There are two ways to define how events mutate the state, described below.
+
+##### Using pattern matching
+
+Using pattern matching, you can define how events mutate the state with functions that return the new `AggregateState` instance.
+
+For example:
 
 ```csharp
 record BookingState : AggregateState<BookingState, BookingId> {
@@ -127,7 +133,11 @@ record BookingState : AggregateState<BookingState, BookingId> {
 }
 ```
 
-However, you'd prefer using typed state mutation functions for your state classes. The syntax is similar to registered command handlers for the [application service]({{< ref "application" >}}):
+##### Using explicit handlers
+
+You can also use explicit event handlers, where you define one function per event, and register them in the constructor. In that case, there's no need to override the `When` function.
+
+The syntax is similar to registered command handlers for the [application service]({{< ref "application" >}}):
 
 ```csharp
 public record BookingState : AggregateState<BookingState, BookingId> {
@@ -178,7 +188,9 @@ The last abstraction is `Aggregate<T, TId>`, where `T` is `AggregateState` and `
 Use the `AggregateId` abstract record, which needs a string value for its constructor:
 
 ```csharp
-record BookingId(string Value) : AggregateId(Value);
+record BookingId : AggregateId {
+    public BookingId(string id) : base(id) { }
+}
 ```
 
 The abstract record overrides its `ToString` to return the string value as-is. It also has an implicit conversion operator, which allows you to use a string value without explicitly instantiating the identity record. However, we still recommend instantiating the identity explicitly to benefit from type safety.
