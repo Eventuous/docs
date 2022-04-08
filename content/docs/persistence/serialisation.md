@@ -1,21 +1,25 @@
 ---
 title: "Serialisation"
 description: "How events are serialized and deserialized"
-date: 2021-03-10
-images: []
 weight: 330
 ---
 
 As described on the [Domain events]({{< ref "events" >}}) page, events must be (de)serializable. Eventuous doesn't care about the serialisation format, but requires you to provide a serializer instance, which implements the `IEventSerializer` interface.
 
-The serializer interface is very simple:
+The serializer interface is simple:
 
 ```csharp
-interface IEventSerializer {
-    object? Deserialize(ReadOnlySpan<byte> data, string eventType);
+public interface IEventSerializer {
+    DeserializationResult DeserializeEvent(ReadOnlySpan<byte> data, string eventType, string contentType);
 
-    byte[] Serialize(object evt);
+    SerializationResult SerializeEvent(object evt);
 }
+```
+
+The serialization result contains not only the serialized object as bytes, but also the event type as string (see below), and the content type:
+
+```csharp
+public record SerializationResult(string EventType, string ContentType, byte[] Payload);
 ```
 
 ### Type map
