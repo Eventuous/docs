@@ -1,11 +1,6 @@
 ---
 title: "Aggregate store"
-description: "Aggregate store"
-date: 2020-10-06T08:49:31+00:00
-images: []
-menu:
-  docs:
-    parent: "persistence"
+description: "How aggregates are stored in an event store"
 weight: 320
 ---
 
