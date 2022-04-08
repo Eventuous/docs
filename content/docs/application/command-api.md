@@ -1,10 +1,6 @@
 ---
 title: "Command API"
 description: "Auto-generated HTTP API for command handling"
-images: []
-menu:
-  docs:
-    parent: "application"
 weight: 430
 toc: true
 ---

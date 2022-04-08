@@ -1,13 +1,6 @@
 ---
 title: "Application service"
-description: "Application service"
-date: 2020-10-06T08:49:31+00:00
-lastmod: 2020-10-06T08:49:31+00:00
-draft: false
-images: []
-menu:
-  docs:
-    parent: "application"
+description: "Application service and unit of work"
 weight: 420
 toc: true
 ---

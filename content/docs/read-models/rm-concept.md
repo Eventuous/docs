@@ -1,13 +1,6 @@
 ---
 title: "Concept"
 description: "The concept of read models"
-date: 2021-04-08
-lastmod: 2021-04-08
-draft: false
-images: []
-menu:
-  docs:
-    parent: "read-models"
 weight: 620
 toc: true
 ---

@@ -3,7 +3,6 @@ title: "Persistence"
 description: >
     What about repositories and other questions about persistence
 date: 2021-03-20
-images: []
 ---
 
 ### Why you don't have repositories?

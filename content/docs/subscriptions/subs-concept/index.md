@@ -1,11 +1,6 @@
 ---
 title: "Real-time subscription"
 description: "The concept of real-time subscriptions"
-date: 2021-04-10
-images: []
-menu:
-  docs:
-    parent: "subscriptions"
 weight: 510
 toc: true
 ---

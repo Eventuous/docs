@@ -1,7 +1,6 @@
 ---
 title: "All stream subscription"
 description: "Subscribe to all events in the store"
-images: []
 weight: 10
 ---
 

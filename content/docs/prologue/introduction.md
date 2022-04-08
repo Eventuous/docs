@@ -1,8 +1,6 @@
 ---
 title: "Introduction"
 description: ""
-date: 2021-03-10
-images: []
 weight: 100
 ---
 

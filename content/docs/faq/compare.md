@@ -2,7 +2,6 @@
 title: "Compare"
 description: "How Eventuous is different from others?"
 date: 2021-03-20
-images: []
 weight: 930
 ---
 
