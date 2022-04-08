@@ -45,3 +45,38 @@ The `AddAggregateStore` extension is available in the `Eventuous.AspNetCore` NuG
 {{% alert icon="👉" %}}
 Make sure to read about [events serialisation]({{< ref "serialisation">}}).
 {{% /alert %}}
+
+## Stream name
+
+The aggregate store (application-level abstraction) uses an event store (infrastructure) to store events in streams. Each aggregate instance has its own stream, so the event store needs to be capable to read and write events from/to the correct stream.
+
+By default, Eventuous uses the `AggregateType.Name` combined with the aggregate id as the stream name. For example, the `Booking` aggregate with id `1` has a stream name `Booking-1`. That's what `StreamName.For<Booking>(1)` returns.
+
+However, you might want to have more fine-grained control over the stream name. For example, you might want to include the tenant id in the stream name. It's possible to override the default convention by configuring the stream name mapping. The stream map contains a mapping between the aggregate identity type (derived from `AggregateId`) and the stream name generation function. Therefore, any additional property of the aggregate identity type can be used to generate the stream name.
+
+For example, the following code registers a stream name mapping for the `Booking` aggregate:
+
+```csharp
+public record BookingId : AggregateId {
+    public BookingId(string id, string tenantId) : base(id) {
+        TenantId = tenantId;
+    }
+
+    public string TenantId { get; }
+}
+
+public class BookingService : ApplicationService<Booking, BookingState, BookingId> {
+    public BookingService(IAggregateStore store, StreamNameMap streamNameMap)
+        : base(store, streamNameMap: streamNameMap) {
+        // command handlers registered here
+    }
+}
+
+// code of the bootstrapper
+var streamNameMap = new StreamNameMap();
+streamNameMap.Register<Booking, BookingState, BookingId>(
+    id => $"Booking-{id.TenantId}-{id.Id}"
+);
+services.AddSingleton(streamNameMap);
+services.AddApplicationService<BookingService>();
+```

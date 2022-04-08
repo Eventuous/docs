@@ -127,6 +127,46 @@ record BookingState : AggregateState<BookingState, BookingId> {
 }
 ```
 
+However, you'd prefer using typed state mutation functions for your state classes. The syntax is similar to registered command handlers for the [application service]({{< ref "application" >}}):
+
+```csharp
+public record BookingState : AggregateState<BookingState, BookingId> {
+    public BookingState() {
+        On<RoomBooked>(
+            (state, booked) => state with { 
+                Id = new BookingId(booked.BookingId), 
+                Price = booked.Price 
+            }
+        );
+
+        On<BookingImported>(
+            (state, imported) => state with { 
+                Id = new BookingId(imported.BookingId) 
+            }
+        );
+
+        On<BookingPaymentRegistered>(
+            (state, paid) => state with {
+                PaymentRecords = state.PaymentRecords.Add(
+                    new PaymentRecord(paid.PaymentId, paid.AmountPaid)
+                ),
+                AmountPaid = paid.FullPaidAmount
+            }
+        );
+    }
+
+    decimal Price          { get; init; }
+    decimal AmountPaid     { get; init; }
+
+    ImmutableList<PaymentRecord> PaymentRecords { get; init; } =
+        ImmutableList<PaymentRecord>.Empty;
+}
+```
+
+{{% alert icon="👉" %}}
+Always set the state `Id` property to the aggregate identity when handling events that happen first in the aggregate lifecycle. For example, the code above does it for `BookingImported` and `RoomBooked` events because either of them are the first events in the aggregate lifecycle.
+{{%/ alert %}}
+
 The default branch of the switch expression returns the current instance as it received an unknown event. You might decide to throw an exception there.
 
 ### Aggregate with typed identity
