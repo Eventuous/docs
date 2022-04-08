@@ -1,8 +1,7 @@
 ---
 title: "Domain events"
-description: "Domain events"
+description: "Domain events: persisted behaviour"
 weight: 210
-toc: true
 ---
 
 {{< alert icon="🙄" >}}

@@ -1,8 +1,7 @@
 ---
 title: "Aggregate"
-description: "Aggregate"
+description: "Aggregate: consistency boundaries"
 weight: 200
-toc: true
 ---
 
 ## Concept

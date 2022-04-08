@@ -19,7 +19,7 @@ The "Right Way" (according to us)
 
 Quite a few diagrams from articles that claim to explain to you about what Event Sourcing is and how to implement it suffer from the same issues:
 
-- Using some kind of bus to propagate [domain events]({{< ref "events" >}}) to read models
+- Using some kind of bus to propagate [domain events]({{< ref "domain-events" >}}) to read models
 - Bring unnecessary components and, therefore, complexity to the picture
 - Mixing up Event-Driven Architecture (EDA) with Event Sourcing
 - Not using domain events as the domain model state

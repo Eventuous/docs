@@ -2,7 +2,6 @@
 title: "Aggregate stream"
 description: "Aggregate as a stream of events"
 weight: 310
-toc: true
 ---
 
 ## Concept

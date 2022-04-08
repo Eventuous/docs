@@ -2,7 +2,6 @@
 title: "Event store"
 description: "Event store infrastructure"
 weight: 310
-toc: true
 ---
 
 In order to isolate the core library from a particular way of storing events, Eventuous uses the `IEventStore` abstraction. Whilst it's used by `AggregateStore`, you can also use it in a more generic way, when you need to persist or read events without having an aggregate.

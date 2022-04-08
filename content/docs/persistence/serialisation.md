@@ -4,7 +4,7 @@ description: "How events are serialized and deserialized"
 weight: 330
 ---
 
-As described on the [Domain events]({{< ref "events" >}}) page, events must be (de)serializable. Eventuous doesn't care about the serialisation format, but requires you to provide a serializer instance, which implements the `IEventSerializer` interface.
+As described on the [Domain events]({{< ref "domain-events" >}}) page, events must be (de)serializable. Eventuous doesn't care about the serialisation format, but requires you to provide a serializer instance, which implements the `IEventSerializer` interface.
 
 The serializer interface is simple:
 
