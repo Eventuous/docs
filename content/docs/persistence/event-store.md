@@ -6,6 +6,8 @@ weight: 310
 
 In order to isolate the core library from a particular way of storing events, Eventuous uses the `IEventStore` abstraction. Whilst it's used by `AggregateStore`, you can also use it in a more generic way, when you need to persist or read events without having an aggregate.
 
+The `IEventStore` interface inherits from `IEventReader` and `IEventWriter` interfaces. Each of those interfaces is focused on one specific task - reading events from streams, and appending events to streams. This separation is necessary for scenarios when you only need, for example, to read events from a specific store, but not to append them. In such case, you'd want to use the `IEventReader` interface only.
+
 We have two implementations of event store:
 - `EsdbEventStore` which uses [EventStoreDB](https://eventstore.com)
 - In-memory store in the test project
@@ -30,8 +32,6 @@ Right now, we only have four operations for an event store:
 |-----------------------|---------------------------------------------------------------------------------------------------------------|
 | `AppendEvents`        | Append one or more events to a given stream.                                                                  |
 | `ReadEvents`          | Read events from a stream forwards, from a given start position.                                              |
-| `ReadEventsBackwards` | Read events from a stream backwards, starting from the end of the stream.                                     |
-| `ReadStream`          | Read events from a stream forwards asynchronously, calling a function provided as an argument for each event. |
 
 For the parameters, you can look at the interface source code. If you use the EventStoreDB implementation we provide, you won't need to know about the event store abstraction. It is required though if you want to implement it for your preferred database.
 
