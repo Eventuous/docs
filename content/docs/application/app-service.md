@@ -73,6 +73,10 @@ You pass the command handler as a function to one of those methods. The function
 
 In addition, `OnAny` and `OnExisting` need a function, which extracts the aggregate id from the command, as both of those methods will try loading the aggregate instance from the store.
 
+{{% alert icon="👉" title="Stream name" %}}
+Check the [stream name]({{< ref "aggregate-stream#stream-name" >}}) documentation if you need to use custom stream names.
+{{%/ alert %}}
+
 #### Async command handlers
 
 If you need to get outside your process boundary when handling a command, you most probably would need to execute an asynchronous call to something like an external HTTP API or a database. For those cases you need to use async overloads:
