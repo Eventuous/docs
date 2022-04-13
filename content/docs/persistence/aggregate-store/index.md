@@ -65,15 +65,21 @@ The connector is running continuously, and it copies all the events from the hot
 Replication process
 {{< /imgproc >}}
 
-As the connector replicate all the events, there's no need to perform an explicit archive action when storing the events normally using the regular event store. Then, to ensure that old events get removed from the hot store, you need to do so on the infrastructure level. For example, you can use the EventStoreDB feature to define the [stream TTL](https://developers.eventstore.com/server/v21.10/streams.html#stream-metadata) (time to live), after which the events are removed from the hot store during the [scavenge](https://developers.eventstore.com/server/v21.10/operations.html#scavenging-events) process.
+As the connector replicate all the events, there's no need to perform an explicit archive action when storing the events normally using the regular event store. 
+
+### Delete events from the hot store
+
+Then, to ensure that old events get removed from the hot store, you need to do so on the infrastructure level. For example, you can use the EventStoreDB feature to define the [stream TTL](https://developers.eventstore.com/server/v21.10/streams.html#stream-metadata) (time to live), after which the events are removed from the hot store during the [scavenge](https://developers.eventstore.com/server/v21.10/operations.html#scavenging-events) process.
 
 > Right now, there's no built-in support for setting the stream metadata using Eventuous, but it is [being built](https://github.com/Eventuous/eventuous/issues/85).
 
 When all the bits and pieces are in place, old events will be disappearing from the hot store automatically. Alternatively, you can delete old streams using some scheduled job with a pre-defined retention rules. The archive store will keep all the events forever, unless you delete them manually.
 
-> Elastic is a particularly good candidate for the archive store because it has multi-tier architecture as a native feature, and you can easily set up a cluster with warm, cold, and frozen tiers, so that you pay less to keep the historical events.
+### Aggregate store with archive
 
 Now, we need to tell Eventuous to use the archive store. It's done using the `AggregateStore<T>` class, where `T` is the archive event reader. To register an aggregate store that uses EventStoreDB as the hot store and Elastic for archive, use the following code:
+
+> Elastic is a particularly good candidate for the archive store because it has multi-tier architecture as a native feature, and you can easily set up a cluster with warm, cold, and frozen tiers, so that you pay less to keep the historical events.
 
 ```csharp
 // register EventStoreClient
