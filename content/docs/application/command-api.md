@@ -5,6 +5,57 @@ weight: 430
 toc: true
 ---
 
+## Controller base
+
+When using an application service from an HTTP controller, you'd usually inject the service as a dependency, and call it's `Handle` method using the request body:
+
+```csharp
+[Route("/booking")]
+public class CommandApi : ConteollerBase {
+    IApiService<Booking> _service;
+
+    public CommandApi(IApplicationService<Booking> service) => _service = service;
+
+    [HttpPost]
+    [Route("book")]
+    public async Task<ActionResult<Result>> BookRoom(
+        [FromBody] BookRoom cmd, 
+        CancellationToken cancellationToken
+    ) {
+        var result = await _service.Handle(cmd, cancellationToken);
+        result Ok(result);
+    }
+}
+```
+
+The issue here is there's no way to know if the command was successful or not. As the application service won't throw an exception if the command fails, we can't return an error via the HTTP response, unless we parse the [result]({{< ref "app-service#result" >}}) and return a meaningful HTTP response.
+
+Eventuous allows you to simplify the command handling in the API controller by providing a `CommandHttpApiBase<TAggregate>` abstract class, which implements the `ControllerBase` and contains the `Handle` method. The class takes `IApplicationService<TAggregate>` as a dependency. The `Handle` method will call the application service, and also convert the handling result to `ActionResult<Result>`. Here are the rules for exception handling:
+
+| Result exception                 | HTTP response |
+|----------------------------------|---------------|
+| `OptimisticConcurrencyException` | `Conflict`    |
+| `AggregateNotFoundException`     | `NotFound`    |
+| Any other exception              | `BadRequest`  |
+
+Here is an example of a command API controller:
+
+```csharp
+[Route("/booking")]
+public class CommandApi : CommandHttpApiBase<Booking> {
+    public CommandApi(IApplicationService<Booking> service) : base(service) { }
+
+    [HttpPost]
+    [Route("book")]
+    public Task<ActionResult<Result>> BookRoom(
+        [FromBody] BookRoom cmd, 
+        CancellationToken cancellationToken
+    ) => Handle(cmd, cancellationToken);
+}
+```
+
+We recommend using the `CommandHttpApiBase` class when you want to handle commands using the HTTP API.
+
 ## Generated command API
 
 Eventuous can use your application service to generate a command API. Such an API will accept JSON models matching the application service command contracts, and pass those commands as-is to the application service. This feature removes the need to create API endpoints manually using controllers or .NET minimal API. 

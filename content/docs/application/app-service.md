@@ -2,7 +2,6 @@
 title: "Application service"
 description: "Application service and unit of work"
 weight: 420
-toc: true
 ---
 
 {{% alert icon="👉" %}}
@@ -86,49 +85,6 @@ If you need to get outside your process boundary when handling a command, you mo
 - `OnAnyAsync`
 
 These overloads are identical to sync functions, but the command handler function needs to return `Task`, so it can be awaited.
-
-### Calling the service from the API
-
-From your API you can use the command service as a dependency. It doesn't need to be a transient dependency as it is stateless. When using a DI container, the command service can be registered as a singleton. You don't need any interfaces for it.
-
-In the API (controller, gRPC service or message consumer), call the command service directly with the data you got from the API contract. For example:
-
-```csharp
-[Route("api/booking")]
-[ApiController]
-public class BookingsCommandApi : ControllerBase {
-    readonly IApplicationService<Booking> _service;
-    readonly GetNow                       _getNow;
-
-    public BookingsCommandApi(
-        IApplicationService<Booking> service,
-        GetNow getNow
-    ) {
-        _service = service;
-        _getNow  = getNow;
-    }
-
-    [HttpPost]
-    [Authorize]
-    public Task AddBooking(AddBooking addBooking) {
-        var cmd =
-            new BookingCommands.AddBooking(
-                addBooking.BookingId,
-                addBooking.RoomId,
-                addBooking.CheckInDate,
-                addBooking.CheckOutDate,
-                addBooking.Price,
-                User.GetUserId(),
-                _getNow()
-            );
-        return _service.Handle(cmd);
-    }
-}
-```
-
-As you can see, the API endpoint doesn't contain much of a logic. However, you can still include some easy checks like mandatory field validations, or ensuring that emails or phone number are indeed in the right format. The latter, however, could also be done when you construct value objects in the command service.
-
-When you instantiate a command, you just need to call the `Handle` function of the command service.
 
 ### Result
 
