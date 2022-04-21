@@ -107,3 +107,9 @@ The `AddApplicationService` extension will register the `BookingService`, and al
 When you also use `AddControllers`, you get the command service injected to your controllers.
 
 You can simplify your application and avoid creating HTTP endpoints explicitly (as controllers or minimal API endpoints) if you use the [command API feature]({{< ref "command-api" >}}).
+
+## Application HTTP API
+
+The most common use case is to connect the application service to an HTTP API.
+
+Read the [Command API]({{< ref "command-api" >}}) feature documentation for more details.

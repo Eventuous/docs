@@ -108,11 +108,14 @@ The simplest way to register a single command is to make it explicitly in the bo
 ```csharp
 var builder = WebApplication.CreateBuilder();
 
+// Register the app service
 builder.Services.AddApplicationService<BookingService, Booking>();
 
-builder.MapCommand<ProcessPayment, Booking>("payment");
-
 var app = builder.Build();
+
+// Map the command to an API endpoint
+app.MapCommand<ProcessPayment, Booking>("payment");
+
 app.Run();
 
 record ProcessPayment(string BookingId, float PaidAmount);
@@ -121,7 +124,7 @@ record ProcessPayment(string BookingId, float PaidAmount);
 If you annotate the command with the `HttpCommand` attribute, and specify the route, you can avoid providing the route when registering the command:
 
 ```csharp
-builder.MapCommand<BookingCommand, Booking>();
+app.MapCommand<BookingCommand, Booking>();
 ...
 
 [HttpCommand(Route = "payment")]
@@ -133,7 +136,7 @@ public record ProcessPayment(string BookingId, float PaidAmount);
 You can also register multiple commands for the same aggregate type, without a need to provide the aggregate type in the command annotation. To do that, use the extension that will create an `ApplicationServiceRouteBuilder`, then register commands using that builder:
 
 ```csharp
-builder
+app
     .MapAggregateCommands<Booking>()
     .MapCommand<ProcessPayment>()
     .MapCommand<ApplyDiscount>("discount");
@@ -155,7 +158,7 @@ There are two extensions that are able to scan your application for annotated co
 First, the `MapDiscoveredCommand<TAggregate>`, which assumes your application only serves commands for a single aggregate type:
 
 ```csharp
-builder.MapDiscoveredCommands<Booking>();
+app.MapDiscoveredCommands<Booking>();
 
 ...
 [HttpCommand(Route = "payment")] 
@@ -167,7 +170,7 @@ For it to work, all the commands must be annotated and have the route defined in
 The second extension will discover all the annotated commands, which need to have an association with the aggregate type by using the `Aggregate` argument of the attribute, or by using the `AggregateCommands` attribute on the container class (described above):
 
 ```csharp
-builder.MapDiscoveredCommands();
+app.MapDiscoveredCommands();
 
 ...
 
@@ -187,5 +190,28 @@ class V1.PaymentCommands {
 Both extensions will scan the current assembly by default, but you can also provide a list of assemblies to scan as an argument:
 
 ```csharp
-builder.MapDiscoveredCommands(typeof(V1.PaymentCommands).Assembly);
+app.MapDiscoveredCommands(typeof(V1.PaymentCommands).Assembly);
 ```
+
+### Using HttpContext data
+
+Commands processed by the application service might include properties that aren't provided by the API client, but are available in the `HttpContext` object. For example, you can think about the user that is making the request. The details about the user, and the user claims, are available in `HttpContext`.
+
+You can instruct Eventuous to enrich the command before it gets sent to the application service, using the `HttpContext` data. In that case, you also might want to hide the command property from being exposed to the client in the OpenAPI spec.
+
+To hide a property from being exposed to the client, use the `JsonIgnore` attribute:
+
+```csharp
+[HttpCommand(Route = "book")]
+public record BookRoom(string RoomId, string BookingId, [property: JsonIgnore] string UserId);
+```
+
+Then, you can use the `HttpContext` data in your command:
+
+```csharp
+app
+    .MapAggregateCommands<Booking>()
+    .MapCommand<BookRoom>((cmd, ctx) => cmd with { UserId = ctx.User.Identity.Name });
+```
+
+When the command is mapped to the API endpoint like that, and the property is ignored, the OpenAPI specification won't include the ignored property, and the application service will get the command populated with the user id from `HttpContext`.
