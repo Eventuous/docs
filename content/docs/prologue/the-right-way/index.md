@@ -2,7 +2,6 @@
 title: "The Right Way"
 description: "Event Sourcing done right"
 weight: 110
-toc: true
 ---
 
 If you ever searched for a diagram that can give you an idea of what Event Sourcing is about, you can find many images out there. The only issue is that most of them are confusing or just plain wrong.

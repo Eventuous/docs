@@ -2,7 +2,6 @@
 title: "Consume pipe"
 description: "Subscription consume pipes and filters"
 weight: 527
-toc: true
 ---
 
 ## Pipes and filters

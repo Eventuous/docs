@@ -1,6 +1,6 @@
 ---
 title: "Quick start"
-description: ""
+description: "Sample application"
 weight: 130
 ---
 

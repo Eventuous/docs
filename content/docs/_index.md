@@ -1,7 +1,4 @@
 ---
 title: "Documentation"
-linkTitle: "Documentation"
-menu:
-  main:
-    weight: 1
+linkTitle: "Eventuous documentation"
 ---

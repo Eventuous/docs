@@ -59,7 +59,7 @@ public static class BookingEvents {
 
 Oh, that's it? A record? Yes, a record. Domain events are property bags. Their only purpose is to convey the state transition using the language of your domain. Technically, a domain event should just be an object, which can be serialised and deserialized for the purpose of persistence.
 
-Eventuous dos and donts:
+Eventuous do's and dont's:
 - **Do** make sure your domain events can be serialised to a commonly understood format, like JSON.
 - **Do** make domain events immutable.
 - **Do** implement equality by value for domain events.

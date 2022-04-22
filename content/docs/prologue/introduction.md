@@ -1,10 +1,10 @@
 ---
 title: "Introduction"
-description: ""
+description: "What is Eventuous and why you might want to use it?"
 weight: 100
 ---
 
-## What is Eventuous
+## What is Eventuous?
 
 Eventuous is a (relatively) lightweight library, which allows building production-grade applications using the [Event Sourcing](https://zimarev.com/blog/event-sourcing/introduction/) pattern.
 

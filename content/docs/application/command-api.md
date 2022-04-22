@@ -2,7 +2,6 @@
 title: "Command API"
 description: "Auto-generated HTTP API for command handling"
 weight: 430
-toc: true
 ---
 
 ## Controller base

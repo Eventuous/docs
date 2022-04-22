@@ -2,7 +2,6 @@
 title: "Diagnostics"
 description: "Monitoring subscriptions"
 weight: 529
-toc: true
 ---
 
 Out of the box, Eventuous provides metrics and traces for monitoring your subscriptions.

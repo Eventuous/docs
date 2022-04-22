@@ -2,7 +2,6 @@
 title: "Real-time subscription"
 description: "The concept of real-time subscriptions"
 weight: 510
-toc: true
 ---
 
 Real-time subscriptions are essential when building a successful event-sourced system. They support the following sequence of operations:
