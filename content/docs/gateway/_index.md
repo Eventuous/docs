@@ -1,6 +1,5 @@
 ---
 title: "Gateway"
-description: "Event gateway"
-date: 2022-02-22
+description: "Event gateway copies events between databases and brokers"
 weight: 800
 ---
