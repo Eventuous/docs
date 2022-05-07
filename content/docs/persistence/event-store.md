@@ -9,7 +9,8 @@ In order to isolate the core library from a particular way of storing events, Ev
 The `IEventStore` interface inherits from `IEventReader` and `IEventWriter` interfaces. Each of those interfaces is focused on one specific task - reading events from streams, and appending events to streams. This separation is necessary for scenarios when you only need, for example, to read events from a specific store, but not to append them. In such case, you'd want to use the `IEventReader` interface only.
 
 We have two implementations of event store:
-- `EsdbEventStore` which uses [EventStoreDB](https://eventstore.com)
+- `EsdbEventStore` which uses [EventStoreDB](https://eventstore.com) - the default event store.
+- `ElasticEventStore` which uses [Elasticsearch](https://www.elastic.co/products/elasticsearch) - it doesn't support subscriptions, so the intended use is for archive purposes.
 - In-memory store in the test project
 
 ### Primitives
