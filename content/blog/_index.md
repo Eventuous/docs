@@ -1,7 +1,5 @@
 ---
 linkTitle: "Blog"
 title: "The Eventuous Blog"
-menu:
-  main:
-     weight: 2
+menu: {main: {weight: 30}}
 ---

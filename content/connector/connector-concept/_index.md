@@ -1,7 +1,8 @@
 ---
-title: "Connectors"
-description: "Gateway-based connectors"
-weight: 850
+title: "Connector concept"
+description: "Connector concept"
+weight: 100
+type: docs
 ---
 
 Eventuous connectors allow subscribing to events from EventStoreDB (source) and produce derived events to another system (sink). Some sinks also support reduce-like operations that work as [projections]({{< ref "rm-concept" >}}).
