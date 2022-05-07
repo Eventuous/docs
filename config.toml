@@ -1,8 +1,8 @@
 baseURL = "/"
-title = "Eventuous"
+title = "Eventuous: Event Sourcing for .NET"
 
 enableRobotsTXT = true
-description = "Event Sourcing for .NET"
+description = "Event Sourcing library for .NET"
 
 # Hugo allows theme composition (and inheritance). The precedence is from left to right.
 theme = ["docsy"]
@@ -23,6 +23,10 @@ pygmentsUseClassic = false
 #pygmentsOptions = "linenos=table"
 # See https://help.farbox.com/pygments.html
 pygmentsStyle = "tango"
+
+[site]
+title = "Eventuous"
+homeTitle = "Eventuous"
 
 # Configure how URLs look like per section.
 [permalinks]
@@ -65,6 +69,7 @@ id = "UA-00000000-0"
 section = ["HTML", "print"]
 
 [params]
+title = "Eventuous"
 copyright = "Alexey Zimarev"
 #privacy_policy = "https://www.eventstore.com/privacy"
 
