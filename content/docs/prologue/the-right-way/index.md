@@ -1,6 +1,8 @@
 ---
 title: "The Right Way"
-description: "Event Sourcing done right"
+description: >
+    Event Sourcing done right, as it meant to be. Don't get caught up in the misconception that Event Sourcing is the same thing
+    as Event-Driven Architecture.
 weight: 110
 ---
 
@@ -45,7 +47,7 @@ When propagating events to reporting models (read models, query side, whatever y
 Do not use message brokers to publish events when handling commands (do use them to receive commands, though). Make sure your event store database is able to support real-time subscriptions, so you can subscribe to new events, which are already persisted, and do whatever you want with them _after_ they are persisted.
 {{% /alert %}}
 
-Publishing to a message broker from a [subscription]({{< ref "subs-concept" >}}) is an entirely legit scenario. Do not build reporting models by consuming from a broker unless it's an event log-based broker like Apache Kafka, Apache Pulsar or Azure Event Hub. Prefer projecting events by subscribing directly to your event store.
+[Publishing]({{< ref "producers" >}}) events to a message broker from a [subscription]({{< ref "subs-concept" >}}) is an entirely legit scenario. Do not build reporting models by consuming from a broker unless it's an event log-based broker like Apache Kafka, Apache Pulsar or Azure Event Hub. Prefer projecting events by subscribing directly to your event store.
 
 ### Using reporting database as system state
 

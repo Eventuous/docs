@@ -1,6 +1,7 @@
 ---
 title: "Introduction"
-description: "What is Eventuous and why you might want to use it?"
+description: >
+    What is Eventuous and why you want to use it for implementing an event-sourced system with .NET or .NET Core?
 weight: 100
 ---
 
@@ -56,6 +57,8 @@ You can find all the NuGet packages by visiting the [Eventuous profile](https://
 [//]: # ({{< /alert >}})
 
 ## Go further - WIP
+
+Read about [the right way]({{< ref "the-right-way" >}}) to understand how Eventuous embraces the original idea of Event Sourcing.
 
 You can have a look at the sample project in a [separate repository](https://github.com/Eventuous/dotnet-sample).
 
