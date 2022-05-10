@@ -11,11 +11,11 @@ The Connector is a combination of a real-time subscription (currently only to `$
 
 Currently, the following sinks are supported:
 
-| Sink                                             | Supported modes     |
-|:-------------------------------------------------|:--------------------|
-| [Elasticsearch]({{< ref "elastic-connector" >}}) | producer, projector |
-| MongoDB                                          | projector           |
-| MS SQL Server or Azure SQL                       | projector           |
+| Sink                                                                 | Supported modes     |
+|:---------------------------------------------------------------------|:--------------------|
+| [Elasticsearch]({{< ref "esdb-elastic-connector" >}})                | producer, projector |
+| [MongoDB]({{< ref "esdb-mongo-connector" >}})                        | projector           |
+| [MS SQL Server or Azure SQL]({{< ref "esdb-sqlserver-connector" >}}) | projector           |
 
 {{% alert icon="👉" %}}
 Because the Connector uses all the features of Eventuous, it is able to execute both produce and project operations in parallel  using the [partitioning filter]({{< ref "pipes#partitioning-filter" >}}). The only partition key supported right now is the **stream name**. In addition, each sink is fully instrumented for observability with traces and metrics.
@@ -56,4 +56,6 @@ Example: SQL Server projector sidecar
 The Connector role here is to maintain the subscription to EventStoreDB, send events to the gRPC service, receive the reduce function back, execute the response, and maintain the checkpoint. By convention, each sink uses its database for checkpointing.
 
 As a result, it's possible to build a stack-agnostic stateless projector and use the Connector to do the heavy lifting. Each sink also provides observability instrumentation for the database client library it uses.
+
+Refer to the specific connector documentation page for more information.
 

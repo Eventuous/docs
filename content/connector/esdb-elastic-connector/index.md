@@ -25,7 +25,7 @@ The connector section requires one parameter - the connector id. This connector 
 
 ```yaml
 connector:
-  connectorId: "esdb-elastic-connector"
+  connectorId: "esdb-esdb-elastic-connector"
   diagnostics:
     enabled: true
 ```
@@ -98,7 +98,7 @@ Example:
 
 ```yaml
 connector:
-  connectorId: "esdb-elastic-connector"
+  connectorId: "esdb-esdb-elastic-connector"
   diagnostics:
     tracing:
       enabled: true
