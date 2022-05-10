@@ -17,7 +17,9 @@ Currently, the following sinks are supported:
 | MongoDB                                          | projector           |
 | MS SQL Server or Azure SQL                       | projector           |
 
-Because the Connector uses all the features of Eventuous, each sink is fully instrumented for observability with traces and metrics.
+{{% alert icon="👉" %}}
+Because the Connector uses all the features of Eventuous, it is able to execute both produce and project operations in parallel  using the [partitioning filter]({{< ref "pipes#partitioning-filter" >}}). The only partition key supported right now is the **stream name**. In addition, each sink is fully instrumented for observability with traces and metrics.
+{{% /alert %}}
 
 ## Connector modes
 
