@@ -29,7 +29,7 @@ In _producer_ mode, the connector subscribes to the source and produces events t
 
 The producer mode is most useful for the purpose of re-publishing domain events to a broker, or to be used as an archive or backup. For example, the Elasticsearch sink can be used in combination with the [archive event store]({{< ref "aggregate-store#multi-tier-store" >}}) to keep archived events in a cheaper persistence tier, whilst keeping the EventStoreDB database size contained.
 
-When used in combination with a message bus sink, the connector can be used to publish integration events for other services to consume. However, right now the connector lacks the transformation capabilities, so we don't recommend using it in this way when the connector is deployed as-is. However, you can still [build a custom connector](#building-a-custom-connector) for that purpose.
+When used in combination with a message bus sink, the connector can be used to publish integration events for other services to consume. However, right now the connector lacks the transformation capabilities, so we don't recommend using it in this way when the connector is deployed as-is. However, you can still [build a custom connector]({{< ref "custom-connector" >}}) for that purpose.
 
 ### Projector mode
 
@@ -55,6 +55,3 @@ The Connector role here is to maintain the subscription to EventStoreDB, send ev
 
 As a result, it's possible to build a stack-agnostic stateless projector and use the Connector to do the heavy lifting. Each sink also provides observability instrumentation for the database client library it uses.
 
-## Building a custom connector
-
-WIP

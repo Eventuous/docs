@@ -1,7 +1,7 @@
 ---
 title: "EventStoreDB to Elastic"
 description: "Replicate and project events from EventStoreDB to Elasticsearch"
-weight: 200
+weight: 120
 type: docs
 ---
 
