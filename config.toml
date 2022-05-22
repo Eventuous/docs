@@ -148,22 +148,18 @@ no = 'Sorry to hear that. Please <a href="https://github.com/USERNAME/REPOSITORY
 [params.ui.readingtime]
 enable = false
 
-[params.links]
+#[params.links]
 # Developer relevant links. These will show up on right side of footer and in the community page if you have one.
-[[params.links.developer]]
-	name = "GitHub"
-	url = "https://github.com/Eventuous/eventuous"
-	icon = "fab fa-github"
-        desc = "Development takes place here!"
+#[[params.links.developer]]
+#	name = "GitHub"
+#	url = "https://github.com/Eventuous/eventuous"
+#	icon = "fab fa-github"
+#        desc = "Development takes place here!"
 #[[params.links.developer]]
 #	name = "Community forum"
 #	url = "https://discuss.eventstore.com"
 #	icon = "fas fa-comments"
 #        desc = "Discuss development issues around the project"
-
-[params.mermaid]
-enable = true
-theme = "default"
 
 [params.plantuml]
 enable = true
@@ -175,3 +171,18 @@ svg = false
 changefreq = "weekly"
 filename = "sitemap.xml"
 priority = 0.5
+
+[[menu.main]]
+name = "GitHub"
+weight = 50
+url = "https://github.com/eventuous/eventuous/"
+pre = "<i class='fab fa-github'></i>"
+
+[[menu.main]]
+name = "Blog"
+weight = 50
+url = "https://medium.com/eventuous/"
+pre = "<i class='fab fa-medium'></i>"
+
+[[menu.main]]
+

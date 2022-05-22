@@ -39,7 +39,7 @@ The _projector_ mode allows to implement projections that are built using other 
 
 Because the reduce function requires custom implementation, Eventuous Connector needs to call some custom code that will get events and send the reduce function back. That custom code can be completely stateless and, therefore, can execute in parallel, although the Connector will maintain ordered event processing.
 
-The only mode that the Connector is able to execute such custom code at this moment is by using an external gRPC service with bidirectional streaming. The Connector will send events to the gRPC service and the gRPC service will send the reduce function back. Each projector sink implementation requires using its own reduce functions set. 
+The only mode that the connector is able to execute such custom code at this moment is by using an external gRPC service with bidirectional streaming. The connector will send events to the gRPC service and the gRPC service will send the reduce function back. Each projector sink implementation requires using its own reduce functions set. With this model, the external gRPC service implements a gRPC server, and the connector will connect to it as a client.
 
 {{< imgproc connector-grpc-concept.png Fill "900x313" >}}
 Using a gRPC service for reduce functions
