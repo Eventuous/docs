@@ -31,7 +31,7 @@ Subscriptions need to maintain their own [checkpoints]({{< ref "checkpoint" >}})
 
 Most often, you'd want to subscribe to the _global event stream_, so you can build read models, which compose information from different aggregates. Eventuous offers the [All stream subscription]({{< ref "all-stream-sub" >}}) for this use case. In some cases you'd need to subscribe to a regular stream using the [stream subscription]({{< ref "stream-sub" >}}).
 
-In Eventuous, subscriptions are specific to event store implementation. We currently only provide subscriptions for EventStoreDB.
+In Eventuous, subscriptions are specific to event store implementation. In addition, Eventuous has subscriptions to message brokers like Google PubSub and RabbitMQ for integration purposes.
 
 ## The wrong way
 
@@ -66,7 +66,7 @@ Why is this flow "consistent"? It's because the command handling process always 
 
 Subscriptions have many purposes. Most often, you would use a subscription to project domain events to your query models ([read models]({{< ref "read-models" >}})). You can also use subscriptions to transform and publish integration events (see [Gateway]({{< ref "gateway" >}})).
 
-Subscriptions can also be used for integration purposes in combination with [Producers].
+Subscriptions can also be used for integration purposes in combination with [Producers]({{< ref "producers" >}}).
 
 ## Implementation
 
