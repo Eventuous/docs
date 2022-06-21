@@ -140,7 +140,7 @@ For `InsertMany` operation you need to use the `Documents` function that should 
 
 Finally, you can configure each of those operations by using the `Configure` function. It receives the options instance for each operation (`InsertOneOptions`, `InsertManyOptions`, etc) and can change its properties. In most cases, Eventuous uses the default options. However, as mentioned previously, update options are configured to allow upserts.
 
-## Simplified updates
+### Simplified updates
 
 As the update operation is the most frequent one, Eventuous provides shortcuts for defining `UpdateOne` operations. These are overloads of the `On<TEvent` function again, where the first parameter is either a filter builder function or a function to get the document id, and the second parameter is a function to build the update.
 
