@@ -140,3 +140,85 @@ For `InsertMany` operation you need to use the `Documents` function that should 
 
 Finally, you can configure each of those operations by using the `Configure` function. It receives the options instance for each operation (`InsertOneOptions`, `InsertManyOptions`, etc) and can change its properties. In most cases, Eventuous uses the default options. However, as mentioned previously, update options are configured to allow upserts.
 
+## Simplified updates
+
+As the update operation is the most frequent one, Eventuous provides shortcuts for defining `UpdateOne` operations. These are overloads of the `On<TEvent` function again, where the first parameter is either a filter builder function or a function to get the document id, and the second parameter is a function to build the update.
+
+For example:
+
+```csharp
+On<V1.PaymentRecorded>(
+    evt => evt.BookingId,
+    (evt, update) => update.Set(x => x.Outstanding, evt.Outstanding)
+);
+```
+
+## Sample
+
+Here is a full example from the sample application:
+
+```csharp
+public class BookingStateProjection : MongoProjection<BookingDocument> {
+    public BookingStateProjection(IMongoDatabase database) : base(database) {
+        On<V1.RoomBooked>(evt => evt.BookingId, HandleRoomBooked);
+
+        On<V1.PaymentRecorded>(
+            evt => evt.BookingId,
+            (evt, update) => update.Set(x => x.Outstanding, evt.Outstanding)
+        );
+
+        On<V1.BookingFullyPaid>(
+            evt => evt.BookingId,
+            (_, update) => update.Set(x => x.Paid, true)
+        );
+    }
+
+    static UpdateDefinition<BookingDocument> HandleRoomBooked(
+        V1.RoomBooked evt, UpdateDefinitionBuilder<BookingDocument> update
+    )
+        => update.SetOnInsert(x => x.Id, evt.BookingId)
+            .Set(x => x.GuestId, evt.GuestId)
+            .Set(x => x.RoomId, evt.RoomId)
+            .Set(x => x.CheckInDate, evt.CheckInDate)
+            .Set(x => x.CheckOutDate, evt.CheckOutDate)
+            .Set(x => x.BookingPrice, evt.BookingPrice)
+            .Set(x => x.Outstanding, evt.OutstandingAmount);
+}
+```
+
+Here, the projector for `RoomBooked` is moved to a separate function as it's too verbose.
+
+Another example also uses the operation builders:
+
+```csharp
+using Eventuous.Projections.MongoDB;
+using MongoDB.Driver;
+using static Bookings.Domain.Bookings.BookingEvents;
+
+namespace Bookings.Application.Queries;
+
+public class MyBookingsProjection : MongoProjection<MyBookings> {
+    public MyBookingsProjection(IMongoDatabase database) : base(database) {
+        On<V1.RoomBooked>(
+            evt => evt.GuestId,
+            (evt, update) => update.AddToSet(
+                x => x.Bookings,
+                new MyBookings.Booking(evt.BookingId, evt.CheckInDate, evt.CheckOutDate, evt.BookingPrice)
+            )
+        );
+
+        On<V1.BookingCancelled>(
+            b => b.UpdateOne
+                .Filter((evt, doc) =>
+                    doc.Bookings.Select(booking => booking.BookingId).Contains(evt.BookingId)
+                )
+                .Update((evt, update) =>
+                    update.PullFilter(
+                        x => x.Bookings,
+                        x => x.BookingId == evt.BookingId
+                    )
+                )
+        );
+    }
+}
+```
