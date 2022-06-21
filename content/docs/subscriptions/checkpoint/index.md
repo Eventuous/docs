@@ -50,7 +50,7 @@ record Checkpoint(string Id, ulong? Position);
 
 ### Available stores
 
-If a supported projection type in an Eventuous package for projections (`Eventuous.Projections.*`) requires a checkpoint store, you can find its implementation in that package. For example, the `Eventuous.Projections.MongoDB` package has a checkpoint store implementation for MongoDB.
+If a supported projection type in an Eventuous package for projections requires a checkpoint store, you can find its implementation in that package. For example, the `Eventuous.MongoDB` package has a checkpoint store implementation for MongoDB.
 
 If you register subscriptions in the DI container, you also need to register the checkpoint store:
 
@@ -59,7 +59,42 @@ builder.Services.AddSingleton<IMongoDatabase>(Mongo.ConfigureMongo());
 builder.Services.AddCheckpointStore<MongoCheckpointStore>();
 ```
 
+In case you have multiple subscriptions in one service, and you project to different databases (for example, MongoDB and PostgreSQL), you need to specify the checkpoint store for each subscription. In this case, you don't need to register the checkpoint store globally in the DI container, but use the `UseCheckpointStore` method when building your subscription:
+
+```csharp
+services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
+    "BookingsProjections",
+    builder => builder
+        .Configure(cfg => cfg.ConcurrencyLimit = 2)
+        .UseCheckpointStore<MongoCheckpointStore>()
+        .AddEventHandler<BookingStateProjection>()
+        .AddEventHandler<MyBookingsProjection>()
+        .WithPartitioningByStream(2)
+);
+```
+
+#### MongoDB
+
 The MongoDB checkpoint store will create a collection called `checkpoint` where it will keep one document per subscription.
+
+Each checkpoint document contains the checkpoint id, which is the subscription id. Therefore, you only get one `checkpoint` collection per database.
+
+#### Elasticsearch
+
+The Elasticsearch checkpoint store will create and use the `checkpoint` index, and the document id there would be the subscription id.
+
+#### PostgreSQL
+
+The Postgres checkpoint store will create and use the `checkpoint` table, and the row id there would be the subscription id. Here is the script used to create that table:
+
+```sql
+create table if not exists __schema__.checkpoints (
+    id varchar primary key, 
+    position bigint null 
+);
+```
+
+#### Other stores
 
 In addition to that, Eventuous has two implementations in the core subscriptions package:
 - `MeasuredCheckpointStore`: creates a trace for all the IO operations, wraps an existing store
