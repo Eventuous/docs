@@ -47,7 +47,17 @@ The connector id is used as the Eventuous subscription id. If the target is usin
 
 The assembly name is needed so the Connector can load the specific target implementation. All the target assemblies are included to the container by default, but only the specified assembly is loaded at runtime.
 
-The diagnostics section is self-explanatory. Below, you can find the list of available exporters.
+### Diagnotics configuration
+
+The connector is fully instrumented with traces and metrics. The following configuration parameters are supported:
+
+* `enabled` - if diagnostics are enabled
+* `tracing` - the tracing configuration
+    * `enabled` - if tracing is enabled
+    * `exporters` - the tracing exporters (zipkin, jaeger, otpl)
+* `metrics` - the metrics configuration
+    * `enabled` - if metrics are enabled
+    * `exporters` - the metrics exporters (prometheus, otpl)
 
 #### Metrics exporters
 
@@ -59,6 +69,23 @@ The diagnostics section is self-explanatory. Below, you can find the list of ava
 - `otlp`: Exports traces using OpenTelemetry protocol. You need to configure the exporter using environment variables as [described in the documentation][1].
 - `zipkin`: Exports traces to Zipkin. You can configure the exporter using environment variables as [described in the documentation][2].
 - `jaeger`: Exports traces to Jaeger. You can configure the exporter using environment variables as [described in the documentation][2].
+
+### Source configuration
+
+The source configuration is used to connect to the EventStoreDB, as well as configure the subscription. At the moment, the connector will unconditionally subscribe to `$all` stream.
+
+The following configuration parameters are supported:
+* `connectionString` - EventStoreDB connection string using gRPC protocol. For example: `esdb://localhost:2113?tls=false`
+* `concurrencyLimit` - the subscription concurrency limit. The default value is `1`.
+
+```yaml
+source:
+    connectionString: "esdb://localhost:2113?tls=false"
+    concurrencyLimit: 1
+```
+
+When the subscription concurrency limit is higher than `1`, the subscription will partition events between multiple Elasticsearch producer instances. As those producers will run in parallel, it will increase the overall throughput.
+
 
 [1]: https://opentelemetry.io/docs/reference/specification/protocol/exporter/
 [2]: https://github.com/open-telemetry/opentelemetry-dotnet/blob/d93606ea71d0d124592b3fc60f0388b5701591de/src/OpenTelemetry.Exporter.Jaeger/README.md#environment-variables

@@ -12,50 +12,19 @@ This connector allows you to replicate events to Elasticsearch without having an
 
 ## Configuration
 
-The connector is configured using the `config.yaml` file. You can find an example of this file in the repository.
+The target configuration is used to connect to Elasticsearch, as well as create the necessary elements in Elasticsearch (index template, index rollover policy, and data stream).
 
-The config file consists of three sections:
-* `connector` - the connector configuration
-* `source` - configuration for the EventStoreDB source
-* `target` - configuration for the Elasticsearch target
-
-### Connector configuration
-
-The connector section requires one parameter - the connector id. This connector uses the connector id also as the checkpoint id.
+The first step is to specify the target assembly in the `connector` section of the configuration file.
 
 ```yaml
 connector:
-  connectorId: "esdb-esdb-elastic-connector"
-  diagnostics:
-    enabled: true
+  connectorId: "esdb-elastic-connector"
+  connectorAssembly: "Eventuous.Connector.EsdbElastic"
 ```
 
-If you run multiple instances of the connector, you should use different connector ids.
-
-If you want to enable diagnostics, you need to configure the `diagnostics` [section](#diagnotics-configuration).
-
-### Source configuration
-
-The source configuration is used to connect to the EventStoreDB, as well as configure the subscription. At the moment, the connector will unconditionally subscribe to `$all` stream.
-
-The following configuration parameters are supported:
-* `connectionString` - EventStoreDB connection string using gRPC protocol. For example: `esdb://localhost:2113?tls=false`
-* `concurrencyLimit` - the subscription concurrency limit. The default value is `1`.
-
-```yaml
-source:
-    connectionString: "esdb://localhost:2113?tls=false"
-    concurrencyLimit: 1
-```
-
-When the subscription concurrency limit is higher than `1`, the subscription will partition events between multiple Elasticsearch producer instances. As those producers will run in parallel, it will increase the overall throughput.
-
-### Target configuration
-
-The target configuration is used to connect to Elasticsearch, as well as create the necessary elements in Elasticsearch (index template, index rollover policy, and data stream).
-
-The following configuration parameters are supported:
+The target configuration has the following parameters:
 * `connectionString` - Elasticsearch connection string, should not be used when the `cloudId` is specified
+* `connectorMode` - `producer` or `projector`
 * `cloudId` - Elasticsearch cloud id, should be used when the `connectionString` is not specified
 * `apiKey` - Elasticsearch API key
 * `dataStream` - the index configuration section
@@ -82,45 +51,16 @@ The `tier` section is used to configure the rollover policy tiers. The tier name
 * `readOnly` - if the tier will be read only
 * `delete` - if the tier will be deleted
 
-### Diagnotics configuration
+## Producer mode
 
-The connector is fully instrumented with traces and metrics. The following configuration parameters are supported:
-
-* `enabled` - if diagnostics are enabled
-* `tracing` - the tracing configuration
-    * `enabled` - if tracing is enabled
-    * `exporters` - the tracing exporters (zipkin, jaeger, otpl)
-* `metrics` - the metrics configuration
-    * `enabled` - if metrics are enabled
-    * `exporters` - the metrics exporters (prometheus, otpl)
-
-Example:
-
-```yaml
-connector:
-  connectorId: "esdb-esdb-elastic-connector"
-  diagnostics:
-    tracing:
-      enabled: true
-      exporters: [zipkin]
-    metrics:
-      enabled: true
-      exporters: [prometheus]
-    traceSamplerProbability: 0
-```
-
-There's no way to configure the exporters by now (endpoints, etc), but they accept the usual environment variables.
-
-## Data in Elasticsearch
-
-The connector will use Elastic data stream to store events. Documents in the data stream are immutable, which is a good choice for storing events.
+When running in Producer mode, the Connector will replicate events from EventStoreDB to Elasticsearch using data streams. Documents in the data stream are immutable, which is a good choice for storing events.
 
 Based on the configuration, the connector will create the following elements in Elasticsearch:
 * Index template
 * Data stream
 * Index rollover policy
 
-You can optimise the rollover policy to keep the index size optimal, as well as move older events to a cheaper storage tier.
+You can optimize the rollover policy to keep the index size optimal, as well as move older events to a cheaper storage tier.
 
 Events are replicated to Elasticsearch in the following format:
 
@@ -133,3 +73,8 @@ Events are replicated to Elasticsearch in the following format:
 * `metadata` - flattened event metadata
 * `@timestamp` - the timestamp of the event
 
+There's no need for a sidecar to run the Connector in Producer mode.
+
+## Projector mode
+
+WIP
