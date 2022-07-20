@@ -1,5 +1,5 @@
 ---
-title: "EventStoreDB to SQL Server"
+title: "MS SQL Server"
 description: "Project events from EventStoreDB to Microsoft SQL Server or Azure SQL"
 weight: 130
 type: docs

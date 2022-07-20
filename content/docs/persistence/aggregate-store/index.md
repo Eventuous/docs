@@ -59,7 +59,7 @@ Eventuous has a feature to store historical events in a separate store, called t
 
 ### Archive in real-time
 
-The connector is running continuously, and it copies all the events from the hot store to the archive store. It subscribes to the hot store using a catch-up subscription to the global log, and copies all the events from there to the archive. In this example, we use the [Elastic Connector]({{< ref "esdb-elastic-connector" >}}) to connect the hot store to the archive store.
+The connector is running continuously, and it copies all the events from the hot store to the archive store. It subscribes to the hot store using a catch-up subscription to the global log, and copies all the events from there to the archive. In this example, we use the [Elastic Connector]({{< ref "elastic-target" >}}) to connect the hot store to the archive store.
 
 {{< imgproc replication.png Fill "800x372" >}}
 Replication process
