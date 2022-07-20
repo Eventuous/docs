@@ -161,9 +161,7 @@ The default branch of the switch expression returns the current instance as it r
 Use the `AggregateId` abstract record, which needs a string value for its constructor:
 
 ```csharp
-record BookingId : AggregateId {
-    public BookingId(string id) : base(id) { }
-}
+record BookingId(string Value) : AggregateId(Value);
 ```
 
 The abstract record overrides its `ToString` to return the string value as-is. It also has an implicit conversion operator, which allows you to use a string value without explicitly instantiating the identity record. However, we still recommend instantiating the identity explicitly to benefit from type safety.
