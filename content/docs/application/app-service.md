@@ -44,9 +44,9 @@ public class BookingService
   : ApplicationService<Booking, BookingState, BookingId> {
     public BookingService(IAggregateStore store) : base(store) {
         OnNew<Commands.BookRoom>(
+            cmd => new BookingId(cmd.BookingId),
             (booking, cmd)
                 => booking.BookRoom(
-                    new BookingId(cmd.BookingId),
                     cmd.RoomId,
                     new StayPeriod(cmd.CheckIn, cmd.CheckOut),
                     cmd.Price,
@@ -59,7 +59,6 @@ public class BookingService
             cmd => new BookingId(cmd.BookingId),
             (booking, cmd)
                 => booking.Import(
-                    new BookingId(cmd.BookingId),
                     cmd.RoomId,
                     new StayPeriod(cmd.CheckIn, cmd.CheckOut)
                 )
@@ -70,7 +69,7 @@ public class BookingService
 
 You pass the command handler as a function to one of those methods. The function can be inline, like in the example, or it could be a method in the command service class.
 
-In addition, `OnAny` and `OnExisting` need a function, which extracts the aggregate id from the command, as both of those methods will try loading the aggregate instance from the store.
+In addition, you need to specify a function, which extracts the aggregate id from the command, as both of those methods will try loading the aggregate instance from the store.
 
 {{% alert icon="👉" title="Stream name" %}}
 Check the [stream name]({{< ref "aggregate-stream#stream-name" >}}) documentation if you need to use custom stream names.

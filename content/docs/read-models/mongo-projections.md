@@ -83,13 +83,13 @@ Then, you need to add the necessary operation details. For example, for updating
 ```csharp
 On<V1.BookingCancelled>(
     b => b.UpdateOne
-        .Filter((evt, doc) =>
-            doc.Bookings.Select(booking => booking.BookingId).Contains(evt.BookingId)
+        .Filter((ctx, doc) =>
+            doc.Bookings.Select(booking => booking.BookingId).Contains(ctx.Message.BookingId)
         )
-        .Update((evt, update) =>
+        .UpdateFromContext((ctx, update) =>
             update.PullFilter(
                 x => x.Bookings,
-                x => x.BookingId == evt.BookingId
+                x => x.BookingId == ctx.Message.BookingId
             )
         )
 );
@@ -106,12 +106,12 @@ When you use `UpdateOne` or `DeleteOne` you can simplify the filter further by u
 ```csharp
 On<V1.BookingCancelled>(
     b => b.UpdateOne
-        .Id(evt => evt.BookingId)
+        .Id(ctx => ctx.Message.BookingId)
         .Update(...)
 );
 ```
 
-The `Id` function will build a filter for the document identity to be equal the given value from the event.
+The `Id` function will build a filter for the document identity to be equal the given value from the context.
 
 Naturally, for deletions you don't need to specify anything else that the filter using either one of the `Filter` functions or the `Id` function (for `DeleteOne`).
 
@@ -120,7 +120,7 @@ Both `UpdateOne` and `UpdateMany` requires to specify the update itself. There a
 ```csharp
 On<V1.BookingCancelled>(
     b => b.UpdateOne
-        .Id(evt => evt.BookingId)
+        .Id(ctx => ctx.Message.BookingId)
         .Update(async (evt, update) =>
             var missingData = await GetDataFromElsewhere();
             update.Set(x => x.Somedata, missingData);
@@ -133,7 +133,7 @@ For inserting documents we recommend using updates, and the default update optio
 You can still use the insert operation using `InsertOne` or `InsertMany` builders. In that case, you don't need a filter not an update. All you need is to provide a way to create a projected document instance from the event using the `Document` function. There are, again, two flavours of it - synchronous (preferred) and asynchronous (to get more data elsewhere). For example:
 
 ```csharp
-On<V1.RoomBooked>(b => b.InsertOne.Document(evt => new BookingDocument(...)));
+On<V1.RoomBooked>(b => b.InsertOne.Document(ctx => new BookingDocument(...)));
 ```
 
 For `InsertMany` operation you need to use the `Documents` function that should return a list of documents to insert.
@@ -148,8 +148,8 @@ For example:
 
 ```csharp
 On<V1.PaymentRecorded>(
-    evt => evt.BookingId,
-    (evt, update) => update.Set(x => x.Outstanding, evt.Outstanding)
+    ctx => ctx.Message.BookingId,
+    (ctx, update) => update.Set(x => x.Outstanding, ctx.Message.Outstanding)
 );
 ```
 
@@ -160,29 +160,38 @@ Here is a full example from the sample application:
 ```csharp
 public class BookingStateProjection : MongoProjection<BookingDocument> {
     public BookingStateProjection(IMongoDatabase database) : base(database) {
-        On<V1.RoomBooked>(evt => evt.BookingId, HandleRoomBooked);
+        On<V1.RoomBooked>(stream => stream.GetId(), HandleRoomBooked);
 
         On<V1.PaymentRecorded>(
-            evt => evt.BookingId,
-            (evt, update) => update.Set(x => x.Outstanding, evt.Outstanding)
+            b => b
+                .UpdateOne
+                .DefaultId()
+                .Update((evt, update) =>
+                    update.Set(x => x.Outstanding, evt.Outstanding)
+                )
         );
 
-        On<V1.BookingFullyPaid>(
-            evt => evt.BookingId,
-            (_, update) => update.Set(x => x.Paid, true)
+        On<V1.BookingFullyPaid>(b => b
+            .UpdateOne
+            .DefaultId()
+            .Update((_, update) => update.Set(x => x.Paid, true))
         );
     }
 
     static UpdateDefinition<BookingDocument> HandleRoomBooked(
-        V1.RoomBooked evt, UpdateDefinitionBuilder<BookingDocument> update
-    )
-        => update.SetOnInsert(x => x.Id, evt.BookingId)
+        IMessageConsumeContext<V1.RoomBooked> ctx, 
+        UpdateDefinitionBuilder<BookingDocument> update
+    ) {
+        var evt = ctx.Message;
+
+        return update.SetOnInsert(x => x.Id, ctx.Stream.GetId())
             .Set(x => x.GuestId, evt.GuestId)
             .Set(x => x.RoomId, evt.RoomId)
             .Set(x => x.CheckInDate, evt.CheckInDate)
             .Set(x => x.CheckOutDate, evt.CheckOutDate)
             .Set(x => x.BookingPrice, evt.BookingPrice)
             .Set(x => x.Outstanding, evt.OutstandingAmount);
+    }
 }
 ```
 
@@ -199,23 +208,31 @@ namespace Bookings.Application.Queries;
 
 public class MyBookingsProjection : MongoProjection<MyBookings> {
     public MyBookingsProjection(IMongoDatabase database) : base(database) {
-        On<V1.RoomBooked>(
-            evt => evt.GuestId,
-            (evt, update) => update.AddToSet(
-                x => x.Bookings,
-                new MyBookings.Booking(evt.BookingId, evt.CheckInDate, evt.CheckOutDate, evt.BookingPrice)
+        On<V1.RoomBooked>(b => b
+            .UpdateOne
+            .Id(ctx => ctx.Message.GuestId)
+            .UpdateFromContext((ctx, update) =>
+                update.AddToSet(
+                    x => x.Bookings,
+                    new MyBookings.Booking(ctx.Stream.GetId(),
+                        ctx.Message.CheckInDate,
+                        ctx.Message.CheckOutDate,
+                        ctx.Message.BookingPrice
+                    )
+                )
             )
         );
 
         On<V1.BookingCancelled>(
             b => b.UpdateOne
-                .Filter((evt, doc) =>
-                    doc.Bookings.Select(booking => booking.BookingId).Contains(evt.BookingId)
+                .Filter((ctx, doc) => doc.Bookings
+                        .Select(booking => booking.BookingId)
+                        .Contains(ctx.Stream.GetId())
                 )
-                .Update((evt, update) =>
+                .UpdateFromContext((ctx, update) =>
                     update.PullFilter(
                         x => x.Bookings,
-                        x => x.BookingId == evt.BookingId
+                        x => x.BookingId == ctx.Stream.GetId()
                     )
                 )
         );

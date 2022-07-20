@@ -58,12 +58,15 @@ Eventuous provides three abstract classes for the `Aggregate` pattern, which are
 
 The `Aggregate` abstract class is quite technical and provides very little out of the box.
 
-| Member         | Kind                 | What it's for                                                               |
-|----------------|----------------------|-----------------------------------------------------------------------------|
-| `Changes`      | Read-only collection | Events, which represent new state changes, get added here                   |
-| `ClearChanges` | Method               | Clears the changes collection                                               |
-| `Version`      | Property, `int`      | Current aggregate version, used for optimistic concurrency. Default is `-1` |
-| `AddChange`    | Method               | Adds an event to the list of changes                                        |
+| Member            | Kind                 | What it's for                                                    |
+|-------------------|----------------------|------------------------------------------------------------------|
+| `Original`        | Read-only collection | Events that were loaded from the aggregate stream                |
+| `Changes`         | Read-only collection | Events, which represent new state changes, get added here        |
+| `Current`         | Read-only collection | The collection of the historical and new events                  |
+| `ClearChanges`    | Method               | Clears the changes collection                                    |
+| `OriginalVersion` | Property, `int`      | Original aggregate version at which it was loaded from the store |
+| `Version`         | Property, `int`      | Current aggregate version after new events were applied          |
+| `AddChange`       | Method               | Adds an event to the list of changes                             |
 
 It also has two helpful methods, which aren't related to Event Sourcing:
 - `EnsureExists` - throws if `Version` is `-1`
@@ -75,7 +78,6 @@ All other members are methods. You either need to implement them, or use one of 
 |---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Load`  | Given the list of previously stored events, restores the aggregate state. Normally, it's used for synchronous load, when all the stored events come from event store at once.       |
 | `Fold`  | Applies a single state transition event to the aggregate state and increases the version. Normally, it's used for asynchronous loads, when events come from event store one by one. |
-| `GetId` | Returns the aggregate identity as `string`. As most databases support string identity, it's the most generic type to support persistence.                                           |
 
 When building an application, you'd not need to use the `Aggregate` abstract class as-is. You still might want to use it to implement some advanced scenarios.
 
@@ -111,15 +113,13 @@ Using pattern matching, you can define how events mutate the state with function
 For example:
 
 ```csharp
-record BookingState : AggregateState<BookingState, BookingId> {
+record BookingState : AggregateState<BookingState> {
     decimal Price { get; init; }
 
     public override BookingState When(object @event)
         => @event switch {
-            RoomBooked booked        => this with
-                { Id = new BookingId(booked.BookingId), Price = booked.Price },
-            BookingImported imported => this with
-                { Id = new BookingId(imported.BookingId) },
+            RoomBooked booked        => this with { Price = booked.Price },
+            BookingImported imported => this with { Price = booked.Price },
             _                        => this
         };
 }
@@ -134,19 +134,8 @@ The syntax is similar to registered command handlers for the [application servic
 ```csharp
 public record BookingState : AggregateState<BookingState, BookingId> {
     public BookingState() {
-        On<RoomBooked>(
-            (state, booked) => state with { 
-                Id = new BookingId(booked.BookingId), 
-                Price = booked.Price 
-            }
-        );
-
-        On<BookingImported>(
-            (state, imported) => state with { 
-                Id = new BookingId(imported.BookingId) 
-            }
-        );
-
+        On<RoomBooked>((state, booked) => state with { Price = booked.Price });
+        On<BookingImported>((state, booked) => state with { Price = booked.Price });
         On<BookingPaymentRegistered>(
             (state, paid) => state with {
                 PaymentRecords = state.PaymentRecords.Add(
@@ -165,17 +154,9 @@ public record BookingState : AggregateState<BookingState, BookingId> {
 }
 ```
 
-{{% alert icon="👉" %}}
-Always set the state `Id` property to the aggregate identity when handling events that happen first in the aggregate lifecycle. For example, the code above does it for `BookingImported` and `RoomBooked` events because either of them are the first events in the aggregate lifecycle.
-{{%/ alert %}}
-
 The default branch of the switch expression returns the current instance as it received an unknown event. You might decide to throw an exception there.
 
-### Aggregate with typed identity
-
-The last abstraction is `Aggregate<T, TId>`, where `T` is `AggregateState` and `TId` is the identity type. You can use it if you want to have a typed identity. We provide a small identity value object abstraction, which allows Eventuous to understand that it's indeed the aggregate identity.
-
-#### Aggregate identity
+### Aggregate identity
 
 Use the `AggregateId` abstract record, which needs a string value for its constructor:
 
@@ -187,39 +168,7 @@ record BookingId : AggregateId {
 
 The abstract record overrides its `ToString` to return the string value as-is. It also has an implicit conversion operator, which allows you to use a string value without explicitly instantiating the identity record. However, we still recommend instantiating the identity explicitly to benefit from type safety.
 
-#### Aggregate state with typed identity
-
-The aggregate with typed identity also uses the aggregate state with typed identity. It's because the identity value is a part of the aggregate state.
-
-A typed state base class has its identity property built-in, so you don't need to do anything in addition. The `BookingState` example above uses the typed state and, therefore, is able to set the identity value when it gets it from the event.
-
-As we know what the aggregate identity is when using aggregates with typed identity, the `GetId` function is implemented in the base class. Therefore, there are no more abstract methods to implement in derived classes.
-
-Although the number of generic parameters for this version of the `Aggregate` base class comes to three, it is still the most useful one. It gives you type safety for the aggregate identity, and also nicely separates state from behaviour.
-
-Example:
-
-```csharp
-class Booking : Aggregate<BookingState, BookingId> {
-    public void BookRoom(
-        BookingId id,
-        string roomId,
-        StayPeriod period,
-        decimal price
-    ) {
-        EnsureDoesntExist();
-        Apply(new RoomBooked(
-            id, roomId, period.CheckIn, period.CheckOut, price
-        ));
-    }
-
-    public void Import(BookingId id, string roomId, StayPeriod period) {
-        Apply(new BookingImported(
-            id, roomId, period.CheckIn, period.CheckOut
-        ));
-    }
-}
-```
+The aggregate identity type is only used by the [application service]({{< ref "app-service" >}}) and for calculating the [stream name]({{< ref "aggregate-stream#stream-name" >}}) for loading and saving events.
 
 ## Aggregate factory
 

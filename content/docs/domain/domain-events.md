@@ -4,10 +4,6 @@ description: "Domain events: persisted behaviour"
 weight: 210
 ---
 
-{{< alert icon="🙄" >}}
-There's almost no code here, just a lot of text.
-{{< /alert >}}
-
 ## Concept
 
 If you ever read the [Blue Book](https://www.domainlanguage.com/ddd/blue-book/), you'd notice that the `Domain Event` concept is not mentioned there. Still, years after the book was published, events have become popular, and domain events in particular.
@@ -33,7 +29,6 @@ So, what this page is about? It doesn't look like a conventional documentation p
 ```csharp
 public static class BookingEvents {
     public record RoomBooked(
-        string BookingId,
         string RoomId,
         LocalDate CheckIn,
         LocalDate CheckOut,
@@ -41,15 +36,13 @@ public static class BookingEvents {
     );
 
     public record BookingPaid(
-        string BookingId,
         decimal AmountPaid,
         bool PaidInFull
     );
 
-    public record BookingCancelled(string BookingId);
+    public record BookingCancelled(string Reason);
 
     public record BookingImported(
-        string BookingId,
         string RoomId,
         LocalDate CheckIn,
         LocalDate CheckOut
