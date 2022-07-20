@@ -17,7 +17,7 @@ When talking about Event Sourcing, we focus on the last bit: "making explicit th
 
 > Persist the domain objects state as series of domain events. Each domain event represents an explicit state transition. Applying previously recorded events to a domain objects allows us to recover the current state of the object itself.
 
-We can also cite an [article](https://suzdalnitski.com/oop-will-make-you-suffer-846d072b4dce) from Medium (a bit controversial one):
+We can also cite an [article](https://suzdalnitski.medium.com/oop-will-make-you-suffer-846d072b4dce) from Medium (a bit controversial one):
 
 > In the past, the goto statement was widely used in programming languages, before the advent of procedures/functions. The goto statement simply allowed the program to jump to any part of the code during execution. This made it really hard for the developers to answer the question “how did I get to this point of execution?”. And yes, this has caused a large number of bugs.
 > A very similar problem is happening nowadays. Only this time the difficult question is **“how did I get to this state”** instead of “how did I get to this point of execution”.
