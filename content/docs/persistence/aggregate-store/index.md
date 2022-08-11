@@ -126,7 +126,7 @@ In many cases, replaying the full history is the opposite of what you want. If y
 For example, if you add an _Upcoming check-ins_ read model, it would need to process events from reservations during the booking period that hasn't completed yet. It's not often that you have reservations that are made five years back, in many cases it's just impossible as hotels set their prices only a year or so upfront. Therefore, projecting the full history of reservations would trigger adding and removing thousands of records to the database, which is not what you want. In fact, if you have only reservation events for the past year, and the rest in the archive, you will have the new read model rebuilt much faster, and the fact that all the historical events are archived won't be noticeable.
 
 {{% alert icon="👉" title="Do you need an archive?" %}}
-Remember that you might decide the archive function to your system if you expect your system to produce millions of events per year, and keep them forever.
+Remember that you might decide to use the archive function in your system if you expect it to produce tens of millions events per year, and keep them forever.
 {{%/ alert %}}
 
 
