@@ -79,7 +79,7 @@ The subscription will acknowledge the event only if all of its handlers _don't f
 
 ## Registration
 
-As mentioned before, you'd normally register subscriptions using the DI extensions provided by Eventuous:
+As mentioned before, you'd normally register subscriptions using the DI extensions provided by Eventuous. This example uses the [EventStoreDB]({{< ref "esdb#subscriptions" >}}) subscription.
 
 ```csharp
 builder.Services.AddSubscription<StreamSubscription, StreamSubscriptionOptions>(

@@ -1,12 +1,12 @@
 ---
-title: "MongoDB projections"
-description: "Projecting events to MongoDB documents"
-weight: 630
+title: "MongoDB"
+description: "MongoDB support for projections"
+weight: 15
 ---
 
 MongoDB is a popular document database, and Eventuous natively supports projecting events to it. In combination with Mongo [checkpoint store]({{< ref "checkpoint" >}}) you can comfortably use MongoDB as a queryable store for your read models.
 
-The base class for a MongoDB projection is `MongoProjection<T>` where `T` is a record derived from the `ProjectedDocument` abstract record. 
+The base class for a MongoDB projection is `MongoProjection<T>` where `T` is a record derived from the `ProjectedDocument` abstract record.
 
 ## Projected document
 

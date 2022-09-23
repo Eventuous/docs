@@ -1,6 +1,5 @@
 ---
 title: "Persistence"
-date: 2021-03-10
 weight: 300
 description: >
   Event-sourced persistence abstractions and implementations.

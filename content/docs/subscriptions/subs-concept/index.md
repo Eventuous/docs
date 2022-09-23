@@ -29,7 +29,7 @@ By combining those two projections in _one subscription_, they could be both beh
 
 Subscriptions need to maintain their own [checkpoints]({{< ref "checkpoint" >}}), so when the service that host a subscription restarts, it will start receiving events from the last known position in the stream.
 
-Most often, you'd want to subscribe to the _global event stream_, so you can build read models, which compose information from different aggregates. Eventuous offers the [All stream subscription]({{< ref "all-stream-sub" >}}) for this use case. In some cases you'd need to subscribe to a regular stream using the [stream subscription]({{< ref "stream-sub" >}}).
+Most often, you'd want to subscribe to the _global event stream_, so you can build read models, which compose information from different aggregates. Eventuous offers the [All stream subscription]({{< ref "esdb#all-stream-subscription" >}}) for this use case. In some cases you'd need to subscribe to a regular stream using the [stream subscription]({{< ref "esdb#stream-subscription" >}}).
 
 In Eventuous, subscriptions are specific to event store implementation. In addition, Eventuous has subscriptions to message brokers like Google PubSub and RabbitMQ for integration purposes.
 
@@ -70,4 +70,4 @@ Subscriptions can also be used for integration purposes in combination with [Pro
 
 ## Implementation
 
-Eventuous implement subscriptions for different kinds of infrastructure (transport). As each transport is different, the way to configure them can be different, as well as the way subscriptions work. Read carefully the guidelines for each transport to understand what transport to use for your use case.
+Eventuous implement subscriptions for different kinds of infrastructure (transport). As each transport is different, the way to configure them can be different, as well as the way subscriptions work. Read carefully the [guidelines]({{< ref "infra" >}}) for each transport to understand what transport to use for your use case.

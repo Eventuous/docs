@@ -8,10 +8,9 @@ In order to isolate the core library from a particular way of storing events, Ev
 
 The `IEventStore` interface inherits from `IEventReader` and `IEventWriter` interfaces. Each of those interfaces is focused on one specific task - reading events from streams, and appending events to streams. This separation is necessary for scenarios when you only need, for example, to read events from a specific store, but not to append them. In such case, you'd want to use the `IEventReader` interface only.
 
-We have two implementations of event store:
-- `EsdbEventStore` which uses [EventStoreDB](https://eventstore.com) - the default event store.
-- `ElasticEventStore` which uses [Elasticsearch](https://www.elastic.co/products/elasticsearch) - it doesn't support subscriptions, so the intended use is for archive purposes.
-- In-memory store in the test project
+Eventuous has several implementations of event store abstraction, you can find them in the [infrastructure]({{< ref "infra" >}}) section. The default implementation is `EsdbEventStore`, which uses [EventStoreDB](https://eventstore.com) as the event store. It's a great product, and we're happy to provide first-class support for it. It's also a great product for learning about Event Sourcing and CQRS.
+
+In addition, Eventuous has an in-memory event store, which is mostly used for testing purposes. It's not recommended to use it in production, as it doesn't provide any persistence guarantees.
 
 ### Primitives
 
@@ -34,7 +33,13 @@ Right now, we only have four operations for an event store:
 | `AppendEvents`        | Append one or more events to a given stream.                                                                  |
 | `ReadEvents`          | Read events from a stream forwards, from a given start position.                                              |
 
-For the parameters, you can look at the interface source code. If you use the EventStoreDB implementation we provide, you won't need to know about the event store abstraction. It is required though if you want to implement it for your preferred database.
+Eventuous has several implementations of the event store: 
+ * [EventStoreDB]({{< ref "esdb" >}})
+ * [PostgreSQL]({{< ref "postgres" >}})
+ * [Microsoft SQL Server]({{< ref "mssql" >}})
+ * [Elasticsearch]({{< ref "elastic" >}}) 
+
+If you use one of the implementations provided, you won't need to know about the event store abstraction. It is required though if you want to implement it for your preferred database. 
 
 {{% alert icon="☀️" %}}
 Preferring EventStoreDB will save you lots of time!
