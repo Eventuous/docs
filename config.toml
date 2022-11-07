@@ -182,7 +182,13 @@ pre = "<i class='fab fa-github'></i>"
 name = "Blog"
 weight = 50
 url = "https://medium.com/eventuous/"
-pre = "<i class='fab fa-medium'></i>"
+pre = "<i class='fa-solid fa-heart'></i>"
+
+[[menu.main]]
+name = "Sponsor"
+weight = 50
+url = "https://github.com/sponsors/Eventuous"
+pre = "<i class='fa-solid fa-heart'></i>"
 
 [[menu.main]]
 
