@@ -1,0 +1,107 @@
+baseURL: 'https://eventuous.dev'
+title: 'Eventuous: Event Sourcing for .NET'
+enableRobotsTXT: true
+description: Event Sourcing library for .NET
+theme:
+  - github.com/google/docsy
+  - github.com/google/docsy/dependencies
+enableGitInfo: true
+contentDir: content
+disableKinds:
+  - taxonomy
+  - taxonomyTerm
+pygmentsCodeFences: true
+pygmentsUseClasses: false
+pygmentsUseClassic: false
+pygmentsStyle: tango
+site:
+  title: Eventuous
+  homeTitle: Eventuous
+permalinks:
+  blog: '/:section/:year/:month/:day/:slug/'
+blackfriday:
+  plainIDAnchors: true
+  hrefTargetBlank: true
+  angledQuotes: false
+  latexDashes: true
+imaging:
+  resampleFilter: CatmullRom
+  quality: 75
+  anchor: smart
+services:
+  googleAnalytics:
+    id: UA-00000000-0
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    style: tango
+    guessSyntax: 'true'
+outputs:
+  section:
+    - HTML
+    - print
+params:
+  title: Eventuous
+  copyright: Ubiquitous AS
+  version_menu: Releases
+  archived_version: false
+  version: '0.0'
+  url_latest_version: 'https://example.com'
+  github_repo: 'https://github.com/eventuous/docs'
+  github_project_repo: 'https://github.com/eventuous/eventuous'
+  gcs_engine_id: 252f46a6808014566
+  algolia_docsearch: false
+  offlineSearch: false
+  prism_syntax_highlighting: true
+  ui:
+    sidebar_menu_compact: true
+    sidebar_menu_foldable: true
+    breadcrumb_disable: false
+    sidebar_search_disable: false
+    navbar_logo: true
+    footer_about_disable: true
+    feedback:
+      enable: false
+      'yes': >-
+        Glad to hear it! Please <a
+        href="https://github.com/USERNAME/REPOSITORY/issues/new">tell us how we
+        can improve</a>.
+      'no': >-
+        Sorry to hear that. Please <a
+        href="https://github.com/USERNAME/REPOSITORY/issues/new">tell us how we
+        can improve</a>.
+    readingtime:
+      enable: false
+  links:
+    user:
+      - name: GitHub Discussions
+        url: https://github.com/Eventuous/eventuous/discussions
+        icon: fas fa-comments
+        desc: Discussion and help from your fellow users
+    developer:
+      - name: GitHub
+        url: 'https://github.com/Eventuous/eventuous'
+        icon: fa-brands fa-github
+        desc: Development takes place here!
+  plantuml:
+    enable: true
+    theme: default
+    svg_image_url: 'https://www.plantuml.com/plantuml/svg/'
+    svg: false
+sitemap:
+  changefreq: weekly
+  filename: sitemap.xml
+  priority: 0.5
+menu:
+  main:
+    - name: Blog
+      weight: 50
+      url: 'https://medium.com/eventuous/'
+      pre: <i class='fa-brands fa-medium-m'></i>
+    - name: Sponsor
+      weight: 50
+      url: 'https://github.com/sponsors/Eventuous'
+      pre: <i class='fas fa-heart'></i>
+    - {}
