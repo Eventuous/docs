@@ -10,7 +10,7 @@ When using an application service from an HTTP controller, you'd usually inject 
 
 ```csharp
 [Route("/booking")]
-public class CommandApi : ConteollerBase {
+public class CommandApi : ControllerBase {
     IApiService<Booking> _service;
 
     public CommandApi(IApplicationService<Booking> service) => _service = service;
