@@ -33,9 +33,9 @@ Usually, you just need to register the aggregate store that uses the Postgres ev
 
 ```csharp
 // Local connection factory function
-NpgsqlConnection GetConnection() => new(connectionString);
-
-builder.Services.AddSingleton((GetPostgresConnection)GetConnection);
+NpgsqlDataSourceBuilder GetConnection() => new(connectionString);
+services.AddSingleton(GetConnection());
+services.AddSingleton(new PostgresStoreOptions());
 builder.Services.AddAggregateStore<PostgresStore>();
 ```
 
