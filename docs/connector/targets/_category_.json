@@ -1,0 +1,8 @@
+{
+  "label": "Targets",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Available targets for the Connector"
+  }
+}
