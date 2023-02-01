@@ -44,7 +44,7 @@ You can find all the NuGet packages by visiting the [Eventuous profile](https://
 | `Eventuous.Gateway`                   | Eventuous [gateway](../gateway) for connecting subscriptions with producers                                |
 | `Eventuous.EventStore`                | Support for [EventStoreDB](../infra/esdb) (event store, subscriptions, producers)                          |
 | `Eventuous.Postgresql`                | Support for [PostgreSQL](../infra/postgres) (event store, subscriptions, producers)                        |
-| `Eventuous.Postgresql`                | Support for [Microsoft SQL Server](../infra/mssql) (event store, subscriptions, producers)                 |
+| `Eventuous.SqlServer`                 | Support for [Microsoft SQL Server](../infra/mssql) (event store, subscriptions, producers)                 |
 | `Eventuous.RabbitMq`                  | Support for RabbitMQ (subscriptions, producers)                                                            |
 | `Eventuous.GooglePubSub`              | Support for Google PubSub (subscriptions, producers)                                                       |
 | `Eventuous.Kafka`                     | Support for Apache Kafka (producers)                                                                       |
