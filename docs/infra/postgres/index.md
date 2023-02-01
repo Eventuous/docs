@@ -39,6 +39,21 @@ builder.Services.AddSingleton((GetPostgresConnection)GetConnection);
 builder.Services.AddAggregateStore<PostgresStore>();
 ```
 
+For the newer NpgSql driver (v7+), you can use the `NpgsqlDataSourceBuilder`:
+
+```csharp
+var ds = new NpgsqlDataSourceBuilder(connectionString).Build();
+NpgsqlConnection GetConnection() => ds.CreateConnection();
+builder.Services.AddSingleton(GetConnection());
+builder.Services.AddAggregateStore<PostgresStore>();
+```
+
+You can also override the default schema by configuring the store options:
+
+```csharp
+builder.Services.AddSingleton(new PostgresStoreOptions("my-schema"));
+```
+
 When that's done, Eventuous would persist aggregates in Postgres when you use the [application service](../../application/app-service).
 
 At this moment, the Postgres event store implementation doesn't support stream truncation.
