@@ -3,13 +3,13 @@ title: "Event handlers"
 description: "The last bit of the subscription process"
 ---
 
-Event handlers are at the end of the subscription event processing [pipeline](../pipes). Each subscription has a single consumer, which holds a collection of event handlers added to the subscription. The consumer calls all the event handlers simultaneously, collects the results, and then acknowledges the event to the subscription.
+Event handlers are the final step in the subscription event processing [pipeline](../pipes). Each subscription has a single consumer that holds a collection of event handlers added to the subscription. The consumer calls all the event handlers simultaneously, collects the results, and then acknowledges the event to the subscription.
 
-One typical example of an event handler is a [read model](../../read-models) projector. Eventuous currently supports projecting events to [MongoDB](../../infra/mongodb), but you can also use any other database or even a file system.
+One common example of an event handler is a [read model](../../read-models) model projector. Eventuous currently supports projecting events to MongoDB, but you can use any other database or file system.
 
 ## Abstractions
 
-The default consumer holds a collection of classes that implement the very basic interface of an event handler. The interface is defined like this:
+The default consumer holds classes that implement the basic interface of an event handler, defined as:
 
 ```csharp
 public interface IEventHandler {
@@ -19,29 +19,29 @@ public interface IEventHandler {
 }
 ```
 
-There, the `DiagnosticName` is an informational property. Its value is used in log messages when the handler processes th event or fails to do so. 
+The `DiagnosticName` property provides information that is used in log messages when the handler processes or fails to process the event. The `HandleEvent` function is called for each event received by the consumer and contains the actual event processing code. It should return a result of type `EventHandlingResult`.
 
-The `HandleEvent` function is called for each event received by the consumer, so its implementation contains the actual event processing code. This function should return a result of type `EventHandlingResult` which is a bitmask. 
+The `BaseEventHandler` abstract class is commonly used as the base class for all event handlers, including custom ones, instead of implementing the interface directly. This class sets the DiagnosticName property to the type name of the event handler class.
 
-The second abstraction is the `BaseEventHandler` abstract class. It is normally used as the base class for all the event handlers, including custom ones, instead of implementing the interface directly. The only function of the base class is to set the `DiagnosticName` property to the type name of the event handler class.
+Higher-level event handlers in Eventuous, such as `MongoProjection` and `GatewayHandler`, inherit from the `BaseEventHandler`.
 
-Higher-level event handlers implemented in Eventuous like `MongoProjection` and `GatewayHandler` inherit from `BaseEventHandler`.
+## Handler results
 
-## Process
+A handler typically returns `Success` if the event was handled successfully, `Error` if the event handling failed, or `Ignored` if the handler has no code to process the event. The consumer determines the combined result based on the results returned by the handlers:
 
-Normally, a handler would return `Success` if it handled the event successfully, `Error` if handling the event failed, or `Ignored` when the handler doesn't have any code to process the event. When the consumer gets all the results from its handlers, it decides on the combined result as described below:
-
-- Consider ignored events as processed successfully
-- If all the events were successfully processed, the consumer acknowledges the event
-- If one or more handlers returned an error result, the consumer considers it as an error, and the consumer explicitly NACKs the event
-
-What happens with events that were not acknowledged by the consumer depends on the subscription type and its configuration.
+- Ignored events are considered processed successfully
+- If all events are processed successfully, the consumer acknowledges the event
+- If one or more handlers return an error, the consumer considers it an error and explicitly NACKs the event.
+- 
+The outcome of events that were not acknowledged by the consumer depends on the subscription type and its configuration.
 
 ## Custom handlers
 
-If you need to implement a custom handler like a projector to a relational database, you would normally use a higher-level abstraction provided by Eventuous, which is called `EventHandler`. It allows registering typed handlers per event type in a map, and the `HandleEvent` function of the interface is already implemented there to call the registered handler or return the `Ignore` result if there's no handler for a given event type is registered in the map.
+If you need to implement a custom handler, such as a projector to a relational database, you typically use the `EventHandler` abstraction provided by Eventuous. This abstraction allows you to register typed handlers for specific event types in a map, and the HandleEvent function is already implemented in the interface, which will call the registered handler or return Ignored if no handler is registered for a given event type.
 
-For example, a simple handler below would print `$$$ MONEY! You got USD 100!` on the console when it receives the `PaymentRegistered` event where the paid amount property of the event is `100` and currency is `USD`:
+The `EventHandler` base class takes a `TypeMapper` instance as a constructor argument. If a constructor argument is not provided, the default type mapper instance will be used. The `On<TEvent>` function uses the type mapper to check if the event type `TEvent` is registered in the type map, thus proactively causing the program to crash during startup if a handler is defined for an unregistered event type.
+
+As an example, consider a simple handler that prints "$$$ MONEY! You got USD 100!" to the console when it receives the `PaymentRegistered` event, where the event's paid amount property is 100 and its currency is USD.
 
 ```csharp
 class MoneyHandler : EventHandler {
@@ -57,7 +57,7 @@ class MoneyHandler : EventHandler {
 }
 ```
 
-Another example would be a base class for a projector. It would use the handlers map and allow adding extended handlers purposed for projecting events to a query model. Below you can find an example of a base class for a Postgres projector:
+Another example would be a base class for a projector, which would use the handlers map and allow adding extended handlers for projecting events to a query model. Below is an example of a base class for a Postgres projector:
 
 ```csharp
 public abstract class PostgresProjector : EventHandler {
