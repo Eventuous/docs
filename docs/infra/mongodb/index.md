@@ -239,3 +239,9 @@ public class MyBookingsProjection : MongoProjection<MyBookings> {
     }
 }
 ```
+
+## Registering projections
+
+MongoDB projection is an event handler, so it can be added to a subscription using the `AddEventHandler` extension of the subscription builder.
+
+You can find examples of adding handlers to subscriptions in the [subscription documentation](../../subscriptions/sub-base/#registration).

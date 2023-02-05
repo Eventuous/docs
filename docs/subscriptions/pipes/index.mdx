@@ -83,7 +83,11 @@ Because of such a split, the result returned to the subscription doesn't contain
 
 The concurrent filter is useful in combination with partitioning filter, but it can also be used for other purposes, like batched event processing.
 
-Subscriptions that support delayed consume add this filter by default when necessary (based on the subscription configuration). Check the particular transport subscription implementation to learn more.
+Subscriptions that support delayed consume add this filter by default when necessary (based on the subscription configuration). Usually, you'd need to set the `ConcurrencyLimit` property of the subscription options to a value greater than 1 to enable the concurrent filter.
+
+:::caution
+Do not set the `ConcurrencyLimit` property when using the partitioning filter.
+:::
 
 ### Partitioning filter
 
@@ -108,6 +112,6 @@ The third option will use the default partition key function that uses the messa
 
 All those options require the number of partitions provided as an argument.
 
-As the partitioning filter processes messages in multiple threads, it cannot provide the global processing order. The order of processing is guaranteed within a partition. Due to that fact, it needs to be able to Ack or Nack messages individually, without maintaining global order. Therefore, it only works with `DelayedAckConsumeContext`, and it's often used with the concurrent filter for best performance. As you can imagine, partitioning can only be used for subscriptions that support delayed consume. 
+As the partitioning filter processes messages in multiple threads, it cannot provide the global processing order. The order of processing is guaranteed within a partition. Due to that fact, it needs to be able to Ack or Nack messages individually, without maintaining global order. Therefore, it only works with `AsyncConsumeContext`, and it's often used with the concurrent filter for best performance. As you can imagine, partitioning can only be used for subscriptions that support delayed consume.
 
 Subscriptions that support delayed consume add this filter by default when necessary (based on the subscription configuration) together with the concurrent filter. Check the particular transport subscription implementation to learn more.

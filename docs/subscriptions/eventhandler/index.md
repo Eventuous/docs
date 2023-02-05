@@ -5,7 +5,7 @@ description: "The last bit of the subscription process"
 
 Event handlers are the final step in the subscription event processing [pipeline](../pipes). Each subscription has a single consumer that holds a collection of event handlers added to the subscription. The consumer calls all the event handlers simultaneously, collects the results, and then acknowledges the event to the subscription.
 
-One common example of an event handler is a [read model](../../read-models) model projector. Eventuous currently supports projecting events to MongoDB, but you can use any other database or file system.
+One common example of an event handler is a [read model](../../read-models) projector. Eventuous currently supports projecting events to MongoDB, but you can use any other database or file system.
 
 ## Abstractions
 
@@ -39,9 +39,9 @@ The outcome of events that were not acknowledged by the consumer depends on the 
 
 If you need to implement a custom handler, such as a projector to a relational database, you typically use the `EventHandler` abstraction provided by Eventuous. This abstraction allows you to register typed handlers for specific event types in a map, and the HandleEvent function is already implemented in the interface, which will call the registered handler or return Ignored if no handler is registered for a given event type.
 
-The `EventHandler` base class takes a `TypeMapper` instance as a constructor argument. If a constructor argument is not provided, the default type mapper instance will be used. The `On<TEvent>` function uses the type mapper to check if the event type `TEvent` is registered in the type map, thus proactively causing the program to crash during startup if a handler is defined for an unregistered event type.
+The `EventHandler` base class takes a [`TypeMapper`](../../persistence/serialisation.md#type-map) instance as a constructor argument. If a constructor argument is not provided, the default type mapper instance will be used. The `On<TEvent>` function uses the type mapper to check if the event type `TEvent` is registered in the type map, thus proactively causing the program to crash during startup if a handler is defined for an unregistered event type.
 
-As an example, consider a simple handler that prints "$$$ MONEY! You got USD 100!" to the console when it receives the `PaymentRegistered` event, where the event's paid amount property is 100 and its currency is USD.
+As an example, consider a simple handler that prints *$$$ MONEY! You got USD 100!* to the console when it receives the `PaymentRegistered` event, where the event's paid amount property is 100 and its currency is USD.
 
 ```csharp
 class MoneyHandler : EventHandler {
@@ -86,3 +86,11 @@ public delegate Task<NpgsqlCommand> ProjectToPostgres<T>(
     MessageConsumeContext<T> consumeContext)
     where T : class;
 ```
+
+## Registering handlers
+
+For an event handler to work, it needs to be added to a subscription. The `AddHandler` function on the subscription registration builder takes an instance of the `IEventHandler` interface as an argument. The `AddHandler` function is overloaded to accept a handler instance or a factory function that returns a handler instance.
+
+You can find examples of adding handlers to subscriptions in the [subscription documentation](../sub-base/#registration).
+
+Built-in projectors are event handlers, and they are added to the subscription in the same way as custom handlers.
