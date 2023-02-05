@@ -29,7 +29,7 @@ Task Produce(
 );
 ```
 
-The `IEventProducer` interface also has a property `ReadyNow`, which indicates if the producer is ready. It is needed because gateways to know if the producer is ready to produce messages. In many cases, a producer needs to arrange or check some infrastructure (queue or topic) before it can produce messages. When that work is done, the producer should set the `ReadyNow` property to `true`.
+The `IEventProducer` interface has a property named `ReadyNow`, which indicates the readiness of the producer. This property is important for gateways to determine if the producer is prepared to produce messages. In certain scenarios, the producer may need to set up or verify the necessary infrastructure such as queues or topics before it can begin producing messages. Once this setup is complete, the producer should set the `ReadyNow` property to `true`.
 
 ## Base producer
 
@@ -62,18 +62,18 @@ public record ProducedMessage {
 }
 ```
 
-The `Message` property is the actual message payload. Normally, producers use `IEventSerializer` instance to serialize the message payload. Sometimes, producers must comply with their supporting infrastructure, and use a different way to serialize the message payload. In that case, the `MessageType` property can be added to the produced message body or header, so it can be deserialized by subscriptions.
+The `Message` property represents the actual message payload. Producers typically use an `IEventSerializer` instance to serialize the message payload. However, in certain situations, producers may need to comply with their supporting infrastructure and use a different method for serializing the message payload. In such cases, the `MessageType property can be included in the produced message body or header, allowing for proper deserialization by subscribers.
 
 ## Registration
 
-Eventuous provide several extensions to `IServiceCollection` to register producers. You can provide a pre-made producer instance, a function to resolve the producer from the `IServiceProvider`, or just the producer type if its dependencies can be resolved.
+Eventuous provides several extensions to the `IServiceCollection` interface to register producers. You can provide a pre-made producer instance, a function to resolve the producer from the `IServiceProvider`, or simply the producer type if its dependencies can be resolved automatically.
 
-For example, if you have registered the `EventStoreClient` instance, you can then register the `EventStoreProducer` like this:
+For instance, if you have already registered the `EventStoreClient` instance, you can register the `EventStoreProducer` as follows:
 
 ```csharp
 builder.Services.AddEventProducer<EventStoreProducer>();
 ```
 
-If a producer needs to do some work before ot becomes ready, it should implement the `IHostedService` interface, so it can do all the necessary startup work in `StartAsync` method. When using any of the `AddProducer` extensions, the producer will be registered as a `IHostedService` if the producer implements it.
+If a producer requires some work to be done before it is ready, it should implement the `IHostedService` interface, allowing it to perform necessary startup tasks in its `StartAsync` method. When using any of the `AddEventProducer` extensions, if the producer implements `IHostedService`, it will be registered as such.
 
-Remember that producers are registered as singletons. If you need to have multiple producer instances in your application, you'd need to provide them as direct dependencies instead of registering them. It's not often that you need multiple producer instances, unless you're using gateways. Gateway registration extensions are able to use individual producer instances as dependencies.
+Keep in mind that producers are typically registered as singletons. If you require multiple producer instances for the same infrastructure within your application (like two RabbitMQ producers for different RabbitMQ instances), you must provide them as direct dependencies rather than registering them. It's uncommon to need multiple producer instances, unless you are utilizing gateways. The various `AddEventProducer` overloads register the specified producer as both `IEventProducer` and its implementing service class. For example, `AddEventProducer<RabbitMqProducer>` will register both `IEventProducer` and `RabbitMqProducer`. Gateway registration extensions are capable of utilizing individual producer instances as dependencies.

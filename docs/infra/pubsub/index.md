@@ -1,7 +1,6 @@
 ---
 title: "Google PubSub"
 description: "Producers and subscriptions for Google PubSub"
-weight: 60
+sidebar_position: 6
 ---
 
-WIP

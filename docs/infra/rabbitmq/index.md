@@ -1,6 +1,7 @@
 ---
 title: "RabbitMQ"
 description: "Producers and subscriptions for RabbitMQ"
-weight: 50
+sidebar_position: 5
 ---
 
+WIP
