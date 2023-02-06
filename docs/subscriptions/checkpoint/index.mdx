@@ -6,25 +6,25 @@ import ThemedImage from '@theme/ThemedImage';
 import darkUrl from "./images/commit-handler-dark.png";
 import lightUrl from "./images/commit-handler.png";
 
-When you subscribe to an event store, you need to decide what events you want to receive. A proper event store would allow you to subscribe to any event stream, or to a global stream (_All stream_), which contains all the events from the store, ordered by the time they were appended. Event-oriented brokers that support persistence as ordered event logs also support subscriptions, normally called _consumers_, as it's the publish-subscribe broker terminology.
+When subscribing to an event store, it is important to consider which events you wish to receive. An effective event store should allow you to subscribe to individual event streams or to a global stream known as the "All stream", which contains all events in the store, organized in the order they were recorded. Many event-driven brokers that persist events as ordered logs also support subscriptions, which are often referred to as "consumers".
 
-The subscription decides at what stream position it wants to start receiving events. If you want to process all the historical events, you'd subscribe from the beginning of the stream. If you want to only receive real-time events, you need to subscribe from _now_.
+The subscription you choose will determine at what point in the stream you begin to receive events. If you want to process all historical events, it is necessary to subscribe from the beginning of the stream. However, if you only wish to receive real-time events, it is necessary to subscribe from the current point in time.
 
 ## What's the checkpoint?
 
-As the subscription receives and processes events, it moves further along the stream it subscribed to. Every event the subscription receives and processes has a position in the subscribed stream. This position can be used as a _checkpoint_ of the subscription. If the application that hosts the subscription eventually shuts down, you'd want the subscription to resubscribe from the position, which was processed last, plus one. That's how you achieve _exactly one_ event handling. Therefore, the subscription needs to take care about storing its checkpoint somewhere, so the last known position can be retrieved from the checkpoint store and used to resubscribe.
+As the subscription receives and processes events, it progresses along the subscribed stream. Each event that is received and processed has a unique position within the stream, which serves as a checkpoint for the subscription. If the application hosting the subscription shuts down, it is necessary to resume processing events from the last recorded checkpoint, which is the position of the last processed event plus one. This ensures that each event is handled exactly once. As a result, the subscription must keep track of its checkpoint, either by storing it in a dedicated checkpoint store or by using the event store's built-in functionality.
 
-Some log-based brokers also use the term _offset_ to describe the checkpoint concept.
-
-Subscriptions, which are managed by the server, **don't require** storing checkpoints on the client side. For example, EventStoreDB persistent subscriptions and Google PubSub subscriptions don't require a client-side checkpoint store. Some subscriptions, like RabbitMQ subscription, don't have this concept at all, as RabbitMQ doesn't keep consumed messages, neither ACKed nor NACKed.
+In some log-based brokers, the concept of a checkpoint is referred to as an "offset". Some event-driven brokers manage subscriptions on the server-side, eliminating the need for client-side checkpoint storage. For example, persistent subscriptions in EventStoreDB and subscriptions in Google PubSub do not require a client-side checkpoint store. Other subscriptions, such as those managed by RabbitMQ, do not have the concept of a checkpoint as RabbitMQ does not retain consumed messages, whether they have been acknowledged or not.
 
 ## Checkpoint store
 
-Eventuous provides an abstraction, which allows subscriptions to store checkpoints reliably. You can decide to store it in a file or in a database. You can also decide if you want to store a checkpoint after processing each event, or only flush it now and then. Periodical checkpoint flush decreases the pressure on the infrastructure behind the checkpoint store, but also requires you to make your subscription idempotent. It's usually hard or impossible for integration since you can rarely check if you published an event to a broker or not. However, it can work for read model projections.
+Eventuous offers an abstraction layer that enables subscriptions to store checkpoints securely and reliably. You can choose to store the checkpoint in a file or database and determine the frequency at which you wish to store the checkpoint, whether after processing each event or periodically. Although periodic checkpoint storage reduces the stress on the infrastructure supporting the checkpoint store, it requires the subscription to be idempotent. This can be challenging, especially in integration scenarios where it is often difficult or impossible to determine if an event has been published to the broker or not. However, this approach may work for read model projections.
 
 :::caution Keep the checkpoint safe
-When the checkpoint is lost, the subscription will get all the events. It might be intentional when you are creating a brand new [read model](../../read-models), then it's okay. Otherwise, you get undesired consequences.
+It is important to keep the checkpoint safe, as its loss will result in the subscription receiving all events. This may be intentional when creating a new [read model](../../read-models), but it can also have unintended consequences in other scenarios.
 :::
+
+On top of the abstraction Eventuous provides a few implementations of the checkpoint store, which you can use out of the box. You can also implement your own checkpoint store if you need to store the checkpoint in a custom location.
 
 ### Abstraction
 

@@ -22,7 +22,7 @@ Additional components include:
 - [Gateway](../gateway) for producing events to other services (Event-Driven Architecture support)
 
 :::note
-Eventuous is under active development and doesn't follow semantic versioning. We introduce changes often, according to immediate needs of its production users. The API hasn't reached a stable state  and can change at any time. A patch version update would normally not change the API, but the minor version cloud.
+Eventuous is under active development and doesn't follow semantic versioning. We introduce changes often, according to immediate needs of its production users. The API hasn't reached a stable state and can change at any time. A patch version update would normally not change the API, but the minor version cloud.
 :::
 
 ### Packages
