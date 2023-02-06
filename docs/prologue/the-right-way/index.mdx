@@ -8,24 +8,23 @@ import ThemedImage from '@theme/ThemedImage';
 import darkUrl from "./images/the-right-way-dark.png";
 import lightUrl from "./images/the-right-way.png";
 
-If you ever searched for a diagram that can give you an idea of what Event Sourcing is about, you can find many images out there. The only issue is that most of them are confusing or just plain wrong.
+If you've ever searched for a diagram that explains Event Sourcing, you may have found many images, but most of them are confusing or simply incorrect. Despite claims that Event Sourcing is difficult, many people who have this opinion have never actually tried it or made mistakes during implementation.
 
-It's a bold statement, you'd say, isn't it? It might be, yes. Yet, a lot of people who claim that Event Sourcing is hard, have either never tried it or made mistakes when doing the implementation.
+Eventuous does not claim to be the ultimate authority on the subject. In fact, the library's code is based on previous successful implementations in production and reflects a specific approach to Event Sourcing.
 
-Eventuous does not claim to be the Almighty Source of Truth. Quite the opposite, we argue that the library's code is opinionated and leans towards what was done before with this library in production with success.
-
-Still, as people demand answers about _how to do it right_, we have one for you here.
+However, in response to the demand for guidance on doing Event Sourcing correctly, we have a solution for you here.
 
 ## How Eventuous does it
 
-Check the diagram below to see the whole picture.
+The core of the application is the domain model, which contains essential business functionality that is encapsulated in domain objects. This is the only place where business logic is implemented.
 
-- The beating heart of the application is the domain model. It contains critical business-oriented functionality, encapsulated in the domain objects. The domain model is the only place where the business logic is implemented.
-- Command services receive commands from the outside world and dispatch them to the domain model. They are responsible for the validation of the commands and calling the domain object functions, as well as dealing with persistence.
-- New events are stored in the event store. There, we _must_ have a database that is able to push new events to real-time subscriptions.
-- Stored events are pushed by the event store to subscriptions.
-  - Subscriptions could produce integration (public) events. In Eventuous, the Gateway component is responsible for that.
-  - Another type of subscription could project events to other databases for queries or analytics. Eventuous has support for projecting events to MongoDB.
+The command services receive commands from the external environment and forward them to the domain model. They are responsible for validating commands, calling domain object functions, and managing persistence.
+
+The newly generated events are stored in the event store, which requires a database capable of pushing new events in real-time to subscribers.
+
+The event store pushes the stored events to subscribers. Subscribers can generate integration (public) events, for which the Gateway component in Eventuous is responsible. Another type of subscriber can project events to other databases for query or analytics purposes. Eventuous supports projecting events to MongoDB, but you can project to any database using custom event handlers.
+
+Please refer to the diagram below for a complete understanding of the process.
 
 <ThemedImage
     alt="Eventuous way"
@@ -37,49 +36,48 @@ Check the diagram below to see the whole picture.
 
 ## What's wrong with those other diagrams?
 
-Quite a few diagrams from articles that claim to explain to you about what Event Sourcing is and how to implement it suffer from the same issues:
+Several diagrams that claim to explain Event Sourcing and its implementation often have similar problems, such as:
 
-- Using some kind of bus to propagate [domain events](../../domain/domain-events) to read models
-- Bring unnecessary components and, therefore, complexity to the picture
-- Mixing up Event-Driven Architecture (EDA) with Event Sourcing
-- Not using domain events as the domain model state
+- Using a bus to propagate domain events to read models
+- Introducing unnecessary components and complexity to the diagram
+- Not using domain events as the source of truth for the domain model state
+- Confusing Event-Driven Architecture (EDA) with Event Sourcing
 
-Let's briefly go through those issues.
+Let's examine these issues.
 
 ### Event bus
 
-Message brokers are great, really. It's way better to integrate (micro)services using asynchronous messaging rather than RPC calls. RPC calls introduce spatial and temporal coupling, something you'd want to avoid when doing services.
-
-Still, the integration concern is orthogonal to Event Sourcing; as much as domain events _enable_ message-based integration, it's not a requirement.
+Message brokers can be useful for integrating (micro)services through asynchronous messaging, rather than relying on RPC calls. However, the integration aspect is separate from Event Sourcing. Domain events enable message-based integration, but it's not a requirement.
 
 ![Bad Bus](images/flaming-bus.jpg)
 
-When propagating events to reporting models (read models, query side, whatever you call it) using a broker, you will encounter the following issues:
+Using a broker to propagate events to reporting models (read models, query side, etc.) can lead to:
 
-- **Out of order events.** When projecting events to reporting models, you really want the events to be processed in the same order as they were produced. Not all message brokers give you such a guarantee, as they were designed for a different purpose.
-- **Two-phase commit.** We already mentioned this issue in this documentation. Once again, a database used to store the events and the message broker are two distinct infrastructure components. You can rarely to make a single operation of persisting the event and publishing it to the broker transactional. As a result, one of these operations could fail, effectively making a part of your system inconsistent (having an invalid state). Claims that you can apply technical patterns like _Outbox_ to mitigate the issue are valid. However, the Outbox pattern implementation is very complex and often exceeds the complexity of the essential part of the system itself.
-- **Replay.** This one is probably the most important. Message brokers are often used for the purpose of integration. It means that you find event consumers out there (which you cannot control) reacting to published events. Those consumers produce side effects. Unlike reporting models, integration side effects are not idempotent, as they don't expect an event to happen multiple times. Effectively, when you want to replay all the events from your event store to rebuilt a single reporting model, you will affect all the other consumers. Not only those will be your own reporting models, which you probably don't want to rebuild. You'll also send historical events to consumers outside your area of control, which will start reacting to those events and, more often than not, produce undesired side effects.
+- **Out of order events:** In order to project events to reporting models, it's important that they are processed in the same order as they were produced. Not all message brokers provide this guarantee.
+- **Two-phase commit:** As the database storing the events and the message broker are two separate components, making a single transaction that persists an event and publishes it to the broker can be difficult. One of these operations may fail, causing the system to become inconsistent. While the Outbox pattern can mitigate this issue, its implementation is often more complex than the core system itself.
+- **Replay:** Message brokers are often used for integration, meaning that there are event consumers that react to published events. Unlike reporting models, integration side effects are not idempotent and can't be expected to happen multiple times. When replaying events from the event store to rebuild a single reporting model, other consumers will also be affected and may produce unwanted side effects.
 
 :::caution
-Do not use message brokers to publish events when handling commands (do use them to receive commands, though). Make sure your event store database is able to support real-time subscriptions, so you can subscribe to new events, which are already persisted, and do whatever you want with them _after_ they are persisted.
+Avoid publishing events to a message broker when handling commands. Instead, ensure that the event store database can support real-time subscriptions and subscribe directly to the event store.
 :::
 
-[Publishing](../../producers) events to a message broker from a [subscription](../../subscriptions) is an entirely legit scenario. Do not build reporting models by consuming from a broker unless it's an event log-based broker like Apache Kafka, Apache Pulsar or Azure Event Hub. Prefer projecting events by subscribing directly to your event store.
+Publishing events to a message broker from a subscription is a valid scenario. Eventuous provides a component called `Gateway` for that purpose. However, it's recommended to project events by subscribing directly to the event store, rather than building reporting models by consuming from a broker unless it's an event log-based broker like Apache Kafka, Apache Pulsar or Azure Event Hub.
 
 ### Using reporting database as system state
 
-The very nature of Event Sourcing as a persistence mechanism makes it fully consistent. You append an event to the aggregate stream, using the aggregate version as the expected version for the optimistic concurrency as a transaction. You restore the aggregate state by reading those events. It is atomic, consistent, isolated and durable - ACID, read your own writes and all that.
+Using Reporting Database as System State
+Event Sourcing is a consistent persistence mechanism. An event is appended to the aggregate stream, and the aggregate state is restored by reading these events, which are atomic, consistent, isolated, and durable (ACID).
 
-Still, you find lots of articles describing that just storing events to some kind of ordered log is Event Sourcing, whilst they don't use those events as the source of truth. Instead, they project events to another store asynchronously, outside the transaction scope, and claim it to be Event Sourcing. Make no mistake, it is not. Unlike true Event Sourcing, this method does not guarantee consistency. Using some database on a side, which is fed by events out-of-proc and outside the transaction boundary, inevitably produces a delay between the moment an event is stored, and the moment the state change happens in another database. That other database effectively is a reporting model, but it cannot be considered as consistent storage for the system state. In a genuinely event-sourced system, you can always get the state of any object, which is fully consistent, from the event store. From a projected store, you get a particular state projection, which is not necessary up to date. It is fine for reporting models, but it is not fine for decision-making.
+However, some articles describe Event Sourcing as simply storing events to an ordered log, without using those events as the source of truth. Instead, they project events to another store outside the transaction scope and call it Event Sourcing, but this method does not guarantee consistency. This can result in a delay between when an event is stored and when the state change is reflected in the other database. The latter serves as a reporting model but is not a consistent storage for the system state. In a genuine event-sourced system, the state of any object can always be obtained from the event store and is fully consistent. In a projected store, only a particular state projection is available, which may not be up-to-date. While this is fine for reporting models, it's not suitable for decision-making.
 
 :::caution
-Handling a command produces a state transition of one domain object, and, therefore, the whole system. You must ensure you operate with consistent system state when making a decision to execute the command (or not).
+Handling a command results in a state transition of one domain object and the entire system. It's important to operate with a consistent system state when making decisions to execute a command.
 :::
 
 ### Event-Driven vs Event Sourcing
 
-What we described in two previous paragraphs are two parts of Event-Driven Architecture (EDA). Although Event Sourcing enables you to implement EDA, those two concepts are orthogonal. You can implement an event-sourced system, which doesn't distribute events to the outside. You can also implement an event-driven system without using Event Sourcing.
+Event-Driven Architecture (EDA) is a software design pattern where events, or changes in state, serve as the driving force behind the behavior and interactions of the system's components. In an event-driven system, components communicate with each other by producing and responding to events, rather than by making direct calls to one another. The events are usually managed by a message broker, which is responsible for distributing the events to the appropriate components.
 
-:::note
-Event Sourcing is a way to persist state. Event-Driven Architecture is about integrating system components using events distributed via a message broker.
-:::
+Event Sourcing is a way of persisting the state of a system by storing a sequence of events that represent changes in state, rather than just storing the current state. In event sourcing, the current state of the system is derived from the events that have been recorded.
+
+Although Event Sourcing and EDA are often used together, they are not dependent on each other. It is possible to have an event-driven system without using Event Sourcing to persist state, or an event-sourced system that does not distribute events to the outside. Event Sourcing provides a way to persist state, while EDA is about integrating system components using events. Both Event Sourcing and EDA have their own benefits and trade-offs, and the choice of whether to use one, both, or neither will depend on the specific requirements of the system being developed.
