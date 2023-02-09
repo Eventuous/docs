@@ -14,7 +14,7 @@ The base library has a set of abstractions, following Domain-Driven Design tacti
 Additional components include:
 - [Aggregate persistence](../persistence) using [EventStoreDB](https://eventstore.com), PostgreSQL, and Microsoft SQL Server
 - [Real-time subscriptions](../subscriptions) for EventStoreDB, PostgreSQL, Microsoft SQL Server, RabbitMQ, and Google PubSub
-- [Application services](../application) and HTTP-based commands
+- [Command services](../application) and HTTP-based commands
 - Extensive observability, including Open Telemetry support
 - Integration with ASP.NET Core dependency injection, logging, and Web API
 - [Producers](../producers) for EventStoreDB, RabbitMQ, Google PubSub, and Apache Kafka
@@ -34,7 +34,7 @@ You can find all the NuGet packages by visiting the [Eventuous profile](https://
 | `Eventuous`                           | The umbrella package that includes the most used components                                                |
 | `Eventuous.Domain`                    | Library that includes the [domain model](../domain) abstractions like aggregates                           |
 | `Eventuous.Persistence`               | The base library for [persistence](../persistence), including event store and aggregate store abstractions |
-| `Eventuous.Application`               | [Application services](../application) base library, including diagnostics and DI support                  |
+| `Eventuous.Application`               | [Command services](../application) base library, including diagnostics and DI support                      |
 | `Eventuous.Subscriptions`             | [Subscriptions](../subscriptions) base library, including diagnostics and DI support                       |
 | `Eventuous.Subscriptions.Polly`       | Support for retries in event handlers using [Polly](http://www.thepollyproject.org/)                       |
 | `Eventuous.Producers`                 | [Producers](../producers) base library, including diagnostics and DI support                               |

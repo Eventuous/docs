@@ -70,7 +70,7 @@ Eventuous provides several extensions to the `IServiceCollection` interface to r
 
 For instance, if you have already registered the `EventStoreClient` instance, you can register the `EventStoreProducer` as follows:
 
-```csharp
+```csharp title="Program.cs"
 builder.Services.AddEventProducer<EventStoreProducer>();
 ```
 

@@ -1,8 +1,12 @@
 ---
 title: "Aggregate"
 description: "Aggregate: consistency boundaries"
-weight: 200
+sidebar_position: 1
 ---
+
+:::info
+From version 0.14.0 using aggregates is **optional**. You can define your domain logic using [functional services](../application/func-service.md) instead.
+:::
 
 ## Concept
 
@@ -14,7 +18,7 @@ If you are familiar with the concept, [scroll down](#implementation).
 
 When handling a command, you need to ensure it only changes the state of a single aggregate. An aggregate boundary is a transaction boundary, so the state transition for the aggregate needs to happen entirely or not at all.
 
-:::note
+:::tip No entities
 **TD;LR** Eventuous doesn't have entities other than the Aggregate Root. If you are okay with that, [scroll down](#implementation).
 :::
 
@@ -83,94 +87,84 @@ When building an application, you'd not need to use the `Aggregate` abstract cla
 
 ### Aggregate with state
 
-Inherited from `Aggregate`, the `Aggregate<T>` adds a separate concept of the aggregate state. Traditionally, we consider state as part of the aggregate. However, state is the only part of the aggregate that mutated. We decided to separate state from the behaviour by splitting them into two distinct objects.
+Inherited from `Aggregate`, the `Aggregate<T>` adds a separate concept of the aggregate state. Traditionally, we consider state as part of the aggregate. However, state is the only part of the aggregate that mutated. The primary pattern in Eventuous is to separate state from the behaviour by splitting them into two distinct objects.
+
+:::tip Event-sourced state
+The `State` abstraction is described on the [State](state) page.
+:::
 
 The aggregate state in Eventuous is _immutable_. When applying an event to it, we get a new state.
 
 The stateful aggregate class implements most of the abstract members of the original `Aggregate`. It exposes an API, which allows you to use the stateful aggregate base class directly.
 
-| Member  | Kind     | What it's for                                                                                                                                                                                            |
-|---------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Apply` | Method   | Given a domain event, applies it to the state. Replaces the current state with the new version. Adds the event to the list of changes. Returns a tuple with the previous and the current state versions. |
-| `State` | Property | Returns the current aggregate state.                                                                                                                                                                     |
+| Member    | Kind     | What it's for                                                                                                                                                                                            |
+|-----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Apply`   | Method   | Given a domain event, applies it to the state. Replaces the current state with the new version. Adds the event to the list of changes. Returns a tuple with the previous and the current state versions. |
+| `State`   | Property | Returns the current aggregate state.                                                                                                                                                                     |
+| `Current` | Property | Returns the collection of events loaded from the stream. If it's a new aggregate, it returns an empty list.                                                                                              |
 
-As we don't know how to extract the aggregate identity from this implementation, you still need to implement the `GetId` function.
+Here's an example of a stateful aggregate:
 
-The `Apply` function is virtual, so you can override it to add some contract-based checks (ensure if the state is valid, or the state transition was valid).
+```csharp title="Booking.cs"
+public class Booking : Aggregate<BookingState> {
+    public void BookRoom(string roomId, StayPeriod period, Money price, string? guestId = null) {
+        EnsureDoesntExist();
 
-#### Aggregate state
-
-We have an abstraction for the aggregate state. It might seem unnecessary, but it has a single abstract method, which you need to implement for your own state classes. As mentioned previously, we separated the aggregate behaviour from its state. Moving along, we consider event-based state transitions as part of the state handling. Therefore, the state objects needs to expose an API to receive events and produce a new instance of itself (remember that the state is immutable).
-
-To support state immutability, `AggregateState` is an abstract _record_, not class. Therefore, it supports immutability out of the box and supports `with` syntax to make state transitions easier.
-
-A record, which inherits from `AggregateState` needs to implement a single function called `When`. It gets an event as an argument and returns the new state instance. There are two ways to define how events mutate the state, described below.
-
-##### Using pattern matching
-
-Using pattern matching, you can define how events mutate the state with functions that return the new `AggregateState` instance.
-
-For example:
-
-```csharp
-record BookingState : AggregateState<BookingState> {
-    decimal Price { get; init; }
-
-    public override BookingState When(object @event)
-        => @event switch {
-            RoomBooked booked        => this with { Price = booked.Price },
-            BookingImported imported => this with { Price = booked.Price },
-            _                        => this
-        };
-}
-```
-
-##### Using explicit handlers
-
-You can also use explicit event handlers, where you define one function per event, and register them in the constructor. In that case, there's no need to override the `When` function.
-
-The syntax is similar to registered command handlers for the [application service](../application):
-
-```csharp
-public record BookingState : AggregateState<BookingState, BookingId> {
-    public BookingState() {
-        On<RoomBooked>((state, booked) => state with { Price = booked.Price });
-        On<BookingImported>((state, booked) => state with { Price = booked.Price });
-        On<BookingPaymentRegistered>(
-            (state, paid) => state with {
-                PaymentRecords = state.PaymentRecords.Add(
-                    new PaymentRecord(paid.PaymentId, paid.AmountPaid)
-                ),
-                AmountPaid = paid.FullPaidAmount
-            }
-        );
+        Apply(new RoomBooked(roomId, period.CheckIn, period.CheckOut, price.Amount, guestId));
     }
 
-    decimal Price          { get; init; }
-    decimal AmountPaid     { get; init; }
+    public void Import(string roomId, StayPeriod period, Money price) {
+        EnsureDoesntExist();
 
-    ImmutableList<PaymentRecord> PaymentRecords { get; init; } =
-        ImmutableList<PaymentRecord>.Empty;
+        Apply(new BookingImported(roomId, price.Amount, period.CheckIn, period.CheckOut));
+    }
+
+    public void RecordPayment(string paymentId, Money amount, DateTimeOffset paidAt) {
+        EnsureExists();
+
+        if (HasPaymentRecord(paymentId)) return;
+
+        // The Apply function returns both previous and new state
+        var (previousState, currentState) =
+            Apply(new BookingPaymentRegistered(paymentId, amount.Amount));
+
+        // Using the previous state can be useful for some scenarios
+        if (previousState.AmountPaid != currentState.AmountPaid) {
+            var outstandingAmount = currentState.Price - currentState.AmountPaid;
+            Apply(new BookingOutstandingAmountChanged(outstandingAmount.Amount));
+
+            if (outstandingAmount.Amount < 0) 
+                Apply(new BookingOverpaid(-outstandingAmount.Amount));
+        }
+
+        // The next line only produces an event if the booking was not fully paid before
+        if (!previousState.IsFullyPaid() && currentState.IsFullyPaid()) 
+            Apply(new BookingFullyPaid(paidAt));
+    }
+    
+    // This function uses the previously loaded events collection to 
+    // check if the payment was already recorded. You can do the same using the state.
+    public bool HasPaymentRecord(string paymentId)
+        => Current.OfType<BookingPaymentRegistered>().Any(x => x.PaymentId == paymentId);
+
 }
 ```
-
-The default branch of the switch expression returns the current instance as it received an unknown event. You might decide to throw an exception there.
 
 ### Aggregate identity
 
 Use the `AggregateId` abstract record, which needs a string value for its constructor:
 
-```csharp
-record BookingId(string Value) : AggregateId(Value);
+```csharp title="BookingId.cs"
+public record BookingId(string Value) : AggregateId(Value);
 ```
 
 The abstract record overrides its `ToString` to return the string value as-is. It also has an implicit conversion operator, which allows you to use a string value without explicitly instantiating the identity record. However, we still recommend instantiating the identity explicitly to benefit from type safety.
 
-The aggregate identity type is only used by the [application service](../application/app-service.md) and for calculating the [stream name](../persistence/aggregate-stream.md) for loading and saving events.
+The aggregate identity type is only used by the [command service](../application/app-service.md) and for calculating the [stream name](../persistence/aggregate-stream.md) for loading and saving events.
 
 ## Aggregate factory
 
-Eventuous needs to instantiate your aggregates when it loads them from the store. New instances are also created by the `ApplicationService` when handling a command that operates on a new aggregate. Normally, aggregate classes don't have dependencies, so it is possible to instantiate one by calling its default constructor. However, you might need to have a dependency or two, like a domain service. We advise providing such dependencies when calling the aggregate function from the application service, as an argument. But it's still possible to instruct Eventuous how to construct aggregates that don't have a default parameterless constructor. That's the purpose of the `AggregateFactory` and `AggregateFactoryRegistry`.
+Eventuous needs to instantiate your aggregates when it loads them from the store. New instances are also created by the `CommandService` when handling a command that operates on a new aggregate. Normally, aggregate classes don't have dependencies, so it is possible to instantiate one by calling its default constructor. However, you might need to have a dependency or two, like a domain service. We advise providing such dependencies when calling the aggregate function from the command service, as an argument. But it's still possible to instruct Eventuous how to construct aggregates that don't have a default parameterless constructor. That's the purpose of the `AggregateFactory` and `AggregateFactoryRegistry`.
 
 The `AggregateFactory` is a simple function:
 
@@ -180,19 +174,19 @@ public delegate T AggregateFactory<out T>() where T : Aggregate;
 
 The registry allows you to add custom factory for a particular aggregate type. The registry itself is a singleton, accessible by `AggregateFactoryRegistry.Instance`. You can register your custom factory by using the `CreateAggregateUsing<T>` method of the registry:
 
-```csharp
+```csharp title="Program.cs"
 AggregateFactoryRegistry.CreateAggregateUsing(() => new Booking(availabilityService));
 ```
 
 By default, when there's no custom factory registered in the registry for a particular aggregate type, Eventuous will create new aggregate instances by using reflections. It will only work when the aggregate class has a parameterless constructor (it's provided by the `Aggregate` base class).
 
-It's not a requirement to use the default factory registry singleton. Both `ApplicationService` and `AggregateStore` have an optional parameter that allows you to provide the registry as a dependency. When not provided, the default instance will be used. If you use a custom registry, you can add it to the DI container as singleton.
+It's not a requirement to use the default factory registry singleton. Both `CommandService` and `AggregateStore` have an optional parameter that allows you to provide the registry as a dependency. When not provided, the default instance will be used. If you use a custom registry, you can add it to the DI container as singleton.
 
 ### Dependency injection
 
 The aggregate factory can inject registered dependencies to aggregates when constructing them. For this to work, you need to tell Eventuous that the aggregate needs to be constructed using the container. To do so, use the `AddAggregate<T>` service collection extension:
 
-```csharp
+```csharp title="Program.cs"
 builder.Services.AddAggregate<Booking>();
 builder.Services.AddAggregate<Payment>(
     sp => new Payment(sp.GetRequiredService<PaymentProcessor>, otherService)
@@ -201,7 +195,7 @@ builder.Services.AddAggregate<Payment>(
 
 When that's done, you also need to tell the host to use the registered factories:
 
-```csharp
+```csharp title="Program.cs"
 app.UseAggregateFactory();
 ```
 

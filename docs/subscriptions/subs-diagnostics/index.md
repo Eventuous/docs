@@ -100,9 +100,9 @@ When using Eventuous dependency injection extensions, each registered subscripti
 
 However, you need to register the global Eventuous subscriptions health check by adding one line to the ASP.NET Core health checks registration:
 
-```csharp
+```csharp title="Program.cs"
 builder.Services
-  .AddHealthChecks()
-  .AddSubscriptionsHealthCheck("subscriptions", HealthStatus.Unhealthy, new []{"tag"});
+    .AddHealthChecks()
+    .AddSubscriptionsHealthCheck("subscriptions", HealthStatus.Unhealthy, new []{"tag"});
 ```
 

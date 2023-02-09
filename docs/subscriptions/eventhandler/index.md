@@ -11,7 +11,7 @@ One common example of an event handler is a [read model](../../read-models) proj
 
 The default consumer holds classes that implement the basic interface of an event handler, defined as:
 
-```csharp
+```csharp title="IEventHandler.cs"
 public interface IEventHandler {
     string DiagnosticName { get; }
     
@@ -43,7 +43,7 @@ The `EventHandler` base class takes a [`TypeMapper`](../../persistence/serialisa
 
 As an example, consider a simple handler that prints *$$$ MONEY! You got USD 100!* to the console when it receives the `PaymentRegistered` event, where the event's paid amount property is 100 and its currency is USD.
 
-```csharp
+```csharp title="MoneyHandler.cs"
 class MoneyHandler : EventHandler {
     public MoneyHandler(TypeMapper? typeMap = null) : base(typeMap) {
         On<PaymentRegistered>(
@@ -59,7 +59,7 @@ class MoneyHandler : EventHandler {
 
 Another example would be a base class for a projector, which would use the handlers map and allow adding extended handlers for projecting events to a query model. Below is an example of a base class for a Postgres projector:
 
-```csharp
+```csharp title="PostgresProjector.cs"
 public abstract class PostgresProjector : EventHandler {
     readonly GetPostgresConnection _getConnection;
 

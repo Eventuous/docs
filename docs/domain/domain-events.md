@@ -1,6 +1,7 @@
 ---
 title: "Domain events"
 description: "Domain events: persisted behaviour"
+sidebar_position: 3
 ---
 
 ## Concept
@@ -25,7 +26,7 @@ Event Sourcing effectively answers this question by giving you a history of all 
 
 So, what this page is about? It doesn't look like a conventional documentation page, does it? Nevertheless, let's see how domain events look like when you build a system with Eventuous.
 
-```csharp
+```csharp title="BookingEvents.cs"
 public static class BookingEvents {
     public record RoomBooked(
         string RoomId,

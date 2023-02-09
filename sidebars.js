@@ -52,7 +52,9 @@ const sidebars = {
             link: {type: "doc", id: "application/index"},
             items:[
                 "application/app-service",
+                "application/func-service",
                 "application/command-api",
+                "application/command-map",
             ]
         },
         {

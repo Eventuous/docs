@@ -24,7 +24,7 @@ The `AggregateStore` constructor needs two arguments:
 - [Event store](../event-store.md) (`IEventStore`)
 - [Event serializer](../serialisation.md) (`IEventSerializer`)
 
-Our [`ApplicationService`](../../application/app-service.md) uses the `AggregateStore` in its command-handling flow.
+Our [`CommandService`](../../application/app-service.md) uses the `AggregateStore` in its command-handling flow.
 
 ## Using EventStoreDB
 
@@ -32,7 +32,7 @@ Eventuous supports [EventStoreDB](https://eventstore.com) out of the box, but on
 
 Using this pre-made event persistence is easy. You can register the necessary dependencies in your startup code:
 
-```csharp
+```csharp title="Program.cs"
 var esdbSettings = EventStoreClientSettings.Create(connectionString);
 builder.Services
     .AddSingleton(new EventStoreClient(esdbSettings))
@@ -49,7 +49,7 @@ Make sure to read about [events serialisation](../serialisation.md).
 
 You can build your own event store, if you want to use a different database. If you have another implementation of `IEventStore` interface, you can register the aggregate store like this:
 
-```csharp
+```csharp title="Program.cs"
 builder.Services
     .AddSingleton<IEventStore>(new MyEventStore(...))
     .AddAggregateStore<MyEventStore>();
@@ -89,7 +89,7 @@ Now, we need to tell Eventuous to use the archive store. It's done using the `Ag
 
 > Elastic is a particularly good candidate for the archive store because it has multi-tier architecture as a native feature, and you can easily set up a cluster with warm, cold, and frozen tiers, so that you pay less to keep the historical events.
 
-```csharp
+```csharp title="Program.cs"
 // register EventStoreClient
 // register IElasticClient
 builder.Services.AddAggregateStore<EsdbEventStore, ElasticEventStore>();
@@ -97,7 +97,7 @@ builder.Services.AddAggregateStore<EsdbEventStore, ElasticEventStore>();
 
 The Elastic event reader needs to have a pre-configured index. You'd need to call the following from the bootstrap code:
 
-```csharp
+```csharp title="Program.cs"
 var indexConfig = new IndexConfig { ... };
 var app = builder.Build();
 await app.Services.GetRequiredService<IElasticClient>()

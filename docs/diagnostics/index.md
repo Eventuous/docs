@@ -3,7 +3,7 @@
 Eventuous provides built-in metrics and traces for:
 - Event store
 - Subscriptions, consumers, and event handlers
-- Application services
+- Command services
 
 The built-in diagnostics integrate with [OpenTelemetry](https://opentelemetry.io/) and [Prometheus](https://prometheus.io/).
 

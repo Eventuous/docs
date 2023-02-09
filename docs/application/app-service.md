@@ -1,11 +1,11 @@
 ---
-title: "Application service"
-description: "Application service and unit of work"
-weight: 420
+title: "Command service"
+description: "Command service and unit of work for aggregates"
+sidebar_position: 1
 ---
 
 :::note
-The Application Service base class is **optional**, it just makes your life a bit easier.
+The Command Service base class is **optional**, it just makes your life a bit easier.
 :::
 
 ## Concept
@@ -19,28 +19,31 @@ The command service itself performs the following operations when handling one c
 6. If the operation was successful, the service persists new events to the store. Otherwise, it returns a failure to the edge.
 
 :::caution Handling failures
-The last point above translates to: the application service **does not throw exceptions**. It [returns](#result) an instance of `ErrorResult` instead. It is your responsibility to handle the error.
+The last point above translates to: the command service **does not throw exceptions**. It [returns](#result) an instance of `ErrorResult` instead. It is your responsibility to handle the error.
 :::
 
-## Application service base class
+## Implementation
 
 Eventuous provides a base class for you to build command services. It is a generic abstract class, which is typed to the aggregate type. You should create your own implementation of a command service for each aggregate type. As command execution is transactional, it can only operate on a single aggregate instance, and, logically, only one aggregate type.
 
-### Registering command handlers
+### Handling commands
 
-We have three methods, which you call in your class constructor to register the command handlers:
+The base class has six methods, which you call in your class constructor to register the command handlers:
 
-| Function     | What's it for                                                                                                                                                                                                                                                       |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `OnNew`      | Registers the handler, which expects no instance aggregate to exist (create, register, initialise, etc). It will get a new aggregate instance. The operation will fail when it will try storing the aggregate state due to version mismatch.                        |
-| `OnExisting` | Registers the handler, which expect an aggregate instance to exist. You need to provide a function to extract the aggregate id from the command. The handler will get the aggregate instance loaded from the store, and will throw if there's no aggregate to load. |
-| `OnAny`      | Used for handlers, which can operate both on new and existing aggregate instances. The command service will _try_ to load the aggregate, but won't throw if the load fails, and will pass a new instance instead.                                                   |
+| Function          | What's it for                                                                                                                                                                                                                                                       |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `OnNew`           | Registers the handler, which expects no instance aggregate to exist (create, register, initialise, etc). It will get a new aggregate instance. The operation will fail when it will try storing the aggregate state due to version mismatch.                        |
+| `OnNewAsync`      | The same as `OnNew` but expect an asynchronous command handler.                                                                                                                                                                                                     |
+| `OnExisting`      | Registers the handler, which expect an aggregate instance to exist. You need to provide a function to extract the aggregate id from the command. The handler will get the aggregate instance loaded from the store, and will throw if there's no aggregate to load. |
+| `OnExistingAsync` | The same as `OnExisting` but expect an asynchronous command handler.                                                                                                                                                                                                |
+| `OnAny`           | Used for handlers, which can operate both on new and existing aggregate instances. The command service will _try_ to load the aggregate, but won't throw if the load fails, and will pass a new instance instead.                                                   |
+| `OnAnyAsync`      | The same as `OnAny` but expect an asynchronous command handler.                                                                                                                                                                                                     |
 
 Here is an example of a command service form our test project:
 
-```csharp title="Application/BookingService.cs"
+```csharp title="BookingService.cs"
 public class BookingService
-  : ApplicationService<Booking, BookingState, BookingId> {
+  : CommandService<Booking, BookingState, BookingId> {
     public BookingService(IAggregateStore store) : base(store) {
         OnNew<Commands.BookRoom>(
             cmd => new BookingId(cmd.BookingId),
@@ -94,13 +97,13 @@ If the operation was not successful, the command service will return an instance
 
 ### Bootstrap
 
-If you registered the `EsdbEventStore` and the `AggregateStore` in your `Startup` as described on the [Aggregate store](../persistence/aggregate-store) page, you can also register the application service:
+If you registered the `EsdbEventStore` and the `AggregateStore` in your `Startup` as described on the [Aggregate store](../persistence/aggregate-store) page, you can also register the command service:
 
-```csharp
-services.AddApplicationService<BookingCommandService, Booking>();
+```csharp title="Program.cs"
+builder.Services.AddCommandService<BookingCommandService, Booking>();
 ```
 
-The `AddApplicationService` extension will register the `BookingService`, and also as `IApplicationService<Booking>`, as a singleton. Remember that all the DI extensions are part of the `Eventuous.AspNetCore` NuGet package.
+The `AddCommandService` extension will register the `BookingService`, and also as `ICommandService<Booking>`, as a singleton. Remember that all the DI extensions are part of the `Eventuous.AspNetCore` NuGet package.
 
 When you also use `AddControllers`, you get the command service injected to your controllers.
 
@@ -108,6 +111,6 @@ You can simplify your application and avoid creating HTTP endpoints explicitly (
 
 ## Application HTTP API
 
-The most common use case is to connect the application service to an HTTP API.
+The most common use case is to connect the command service to an HTTP API.
 
 Read the [Command API](./command-api) feature documentation for more details.

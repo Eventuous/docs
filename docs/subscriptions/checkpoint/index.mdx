@@ -30,7 +30,7 @@ On top of the abstraction Eventuous provides a few implementations of the checkp
 
 The checkpoint store interface is simple, it only has two functions:
 
-```csharp
+```csharp title="ICheckpointStore.cs"
 interface ICheckpointStore {
     ValueTask<Checkpoint> GetLastCheckpoint(
         string checkpointId,
@@ -56,15 +56,15 @@ If a supported projection type in an Eventuous package for projections requires 
 
 If you register subscriptions in the DI container, you also need to register the checkpoint store:
 
-```csharp
+```csharp title="Program.cs"
 builder.Services.AddSingleton<IMongoDatabase>(Mongo.ConfigureMongo());
 builder.Services.AddCheckpointStore<MongoCheckpointStore>();
 ```
 
 In case you have multiple subscriptions in one service, and you project to different databases (for example, MongoDB and PostgreSQL), you need to specify the checkpoint store for each subscription. In this case, you don't need to register the checkpoint store globally in the DI container, but use the `UseCheckpointStore` method when building your subscription:
 
-```csharp
-services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
+```csharp title="Program.cs"
+builder.Services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
     "BookingsProjections",
     builder => builder
         .Configure(cfg => cfg.ConcurrencyLimit = 2)

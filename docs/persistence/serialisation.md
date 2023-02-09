@@ -7,7 +7,7 @@ As described on the [Domain events](../domain/domain-events.md) page, events mus
 
 The serializer interface is simple:
 
-```csharp
+```csharp title="IEventSerializer.cs"
 public interface IEventSerializer {
     DeserializationResult DeserializeEvent(ReadOnlySpan<byte> data, string eventType, string contentType);
 
@@ -33,7 +33,7 @@ Therefore, we need to have a way to map strong types of the events to strings, w
 
 For example, if you have a place where domain events are defined, you can put the mapping code there, as a static member:
 
-```csharp
+```csharp title="BookingEvents.cs"
 static class BookingEvents {
     // events are defined here
 
@@ -46,9 +46,9 @@ static class BookingEvents {
 }
 ```
 
-Then, you can call this code in your `Startup`:
+Then, you can call this code in your bootstrap code:
 
-```csharp
+```csharp title="Program.cs"
 BookingEvents.MapBookingEvents();
 ```
 
@@ -101,8 +101,8 @@ Normally, you don't need to register or provide the serializer instance to any o
 
 However, you can register the default serializer with different options, or a custom serializer instead:
 
-```csharp
-services.AddSingleton<IEventSerializer>(
+```csharp title="Program.cs"
+builder.Services.AddSingleton<IEventSerializer>(
     new DefaultEventSerializer(
         new JsonSerializerOptions(JsonSerializerDefaults.Default)
     )
@@ -111,7 +111,7 @@ services.AddSingleton<IEventSerializer>(
 
 You might want to avoid registering the serializer and override the one that Eventuous uses as the default instance:
 
-```csharp
+```csharp title="Program.cs"
 var defaultSerializer = new DefaultEventSerializer(
     new JsonSerializerOptions(JsonSerializerDefaults.Default)
 );

@@ -54,7 +54,7 @@ The message filter can be used to prevent some messages from going down the pipe
 
 Example:
 
-```csharp
+```csharp title="Program.cs"
 builder.Services.AddSubscription<StreamSubscription, StreamSubscriptionOptions>(
     "nonFooSubscription",
     cfg => cfg.AddConsumeFilterFirst(new MessageFilter(x => !x.MessageType.StartWith("foo")))
