@@ -10,10 +10,7 @@ const config = {
   tagline: 'Event Sourcing for .NET',
   favicon: 'img/favicon.ico',
 
-  // Set the production url of your site here
   url: 'https://eventuous.dev',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   organizationName: 'eventuous',
@@ -27,9 +24,6 @@ const config = {
   },
   themes: ['@docusaurus/theme-mermaid'],
 
-  // Even if you don't use internalization, you can use this field to set useful
-  // metadata like html lang. For example, if your site is Chinese, you may want
-  // to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -56,8 +50,8 @@ const config = {
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-    ({
-      // Replace with your project's social card
+    {
+      metadata: [{name: 'keywords', content: 'event sourcing, eventsourcing, dotnet, .NET, .NET Core'}],
       image: 'img/social-card.png',
       navbar: {
         title: 'Eventuous',
@@ -119,10 +113,6 @@ const config = {
                 label: 'Slack',
                 href: 'https://join.slack.com/t/eventuousworkspace/shared_invite/zt-tzrhtbxf-Tk7dSMuoVBvjkSf0Eq~Zpg',
               },
-              // {
-              //   label: 'Twitter',
-              //   href: 'https://twitter.com/docusaurus',
-              // },
             ],
           },
           {
@@ -146,7 +136,7 @@ const config = {
         darkTheme: darkCodeTheme,
         additionalLanguages: ['csharp'],
       },
-    }),
+    },
 };
 
 module.exports = config;

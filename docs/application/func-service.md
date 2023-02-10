@@ -15,6 +15,27 @@ The functional command service is an alternative way to handle commands. There, 
 6. The function either performs the operation and produces new events, or rejects the operation. It can also do nothing.
 7. If the operation was successful, the service persists new events to the store. Otherwise, it returns a failure to the edge.
 
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API Endpoint
+    participant Command Service
+    participant Domain Module
+    participant Event Store
+
+    Client->>+API Endpoint: Request
+    API Endpoint->>API Endpoint: Deserialize request
+    API Endpoint->>+Command Service: Command
+    Command Service->>+Event Store: Load stream
+    Event Store-->>-Command Service: Events
+    Command Service->>+Domain Module: Execute
+    Domain Module-->>-Command Service: New events
+    Command Service->>+Event Store: Append events
+    Event Store-->>-Command Service: Return result
+    Command Service-->>-API Endpoint: Return result
+    API Endpoint-->>-Client: Return result
+```
+
 :::caution Handling failures
 The last point above translates to: the command service **does not throw exceptions**. It [returns](./app-service.md#result) an instance of `ErrorResult` instead. It is your responsibility to handle the error.
 :::
