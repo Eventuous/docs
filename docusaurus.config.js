@@ -34,6 +34,10 @@ const config = {
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        gtag: {
+          trackingID: 'G-B5XTDVJ04L',
+          anonymizeIP: true,
+        },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: "https://github.com/eventuous/docs/edit/master"
@@ -53,6 +57,11 @@ const config = {
     {
       metadata: [{name: 'keywords', content: 'event sourcing, eventsourcing, dotnet, .NET, .NET Core'}],
       image: 'img/social-card.png',
+      // algolia: {
+      //   appId: 'YOUR_APP_ID',
+      //   apiKey: 'YOUR_SEARCH_API_KEY',
+      //   indexName: 'YOUR_INDEX_NAME',
+      // },
       navbar: {
         title: 'Eventuous',
         logo: {
