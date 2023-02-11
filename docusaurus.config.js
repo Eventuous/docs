@@ -57,11 +57,11 @@ const config = {
     {
       metadata: [{name: 'keywords', content: 'event sourcing, eventsourcing, dotnet, .NET, .NET Core'}],
       image: 'img/social-card.png',
-      // algolia: {
-      //   appId: 'YOUR_APP_ID',
-      //   apiKey: 'YOUR_SEARCH_API_KEY',
-      //   indexName: 'YOUR_INDEX_NAME',
-      // },
+      algolia: {
+        appId: 'YQSSKN21VQ',
+        apiKey: 'd62759f3b1948de19fea5476182dbd66',
+        indexName: 'eventuous',
+      },
       navbar: {
         title: 'Eventuous',
         logo: {
