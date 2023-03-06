@@ -29,9 +29,13 @@ const config = {
         locales: ['en'],
     },
 
-    scripts: [
-        {src: "/js/proxy.js", async: false}
+    plugins: [
+        "./src/plugins/proxy"
     ],
+
+    // scripts: [
+    //     {src: "/js/proxy.js", async: false}
+    // ],
 
     presets: [
         [
