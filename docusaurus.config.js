@@ -29,14 +29,6 @@ const config = {
         locales: ['en'],
     },
 
-    plugins: [
-        "./src/plugins/proxy"
-    ],
-
-    // scripts: [
-    //     {src: "/js/proxy.js", async: false}
-    // ],
-
     presets: [
         [
             'classic',
