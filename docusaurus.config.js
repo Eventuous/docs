@@ -29,6 +29,8 @@ const config = {
         locales: ['en'],
     },
 
+    plugins: ["./src/plugins/segment"],
+
     presets: [
         [
             'classic',
