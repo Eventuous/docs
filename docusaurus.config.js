@@ -29,7 +29,7 @@ const config = {
         locales: ['en'],
     },
 
-    plugins: ["./src/plugins/segment"],
+    // plugins: ["./src/plugins/segment"],
 
     presets: [
         [
