@@ -27,10 +27,11 @@ export default function MetadataWrapper(props) {
                     area: area
                 }), 0);
             } else {
-                console.log(area === "" ? page : area);
+                // console.log(area === "" ? page : area);
                 // console.log(sb)
                 // console.log('category', category);
                 // console.log('page', page);
+                console.log('location', location);
             }
         }
     }
