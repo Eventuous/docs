@@ -3,21 +3,35 @@ import Metadata from '@theme-original/DocItem/Metadata';
 import {useDoc} from "@docusaurus/theme-common/internal";
 import {useSidebarBreadcrumbs} from "@docusaurus/theme-common/internal";
 import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
+import {useLocation} from "@docusaurus/router";
 
 let previous = null;
 
 export default function MetadataWrapper(props) {
-    if (ExecutionEnvironment.canUseDOM && window.analytics) {
+    if (ExecutionEnvironment.canUseDOM) {
 
         const x = useDoc();
         if (previous !== x) {
             previous = x;
             const sb = useSidebarBreadcrumbs();
-            const category = sb[0].label;
-            const page = sb[sb.length - 1].label;
-            setTimeout(() => window.analytics.page(page, {category: category}), 0);
-            // console.log('category', category);
-            // console.log('page', page);
+            const category = sb[0];
+            const page = sb[sb.length - 1];
+            const location = useLocation();
+            const area = page.docId === undefined
+                ? page.href.includes('/connector/') ? 'Connector' : 'Core'
+                : page.docId.startsWith('connector') ? 'Connector' : 'Core';
+            if (window.analytics) {
+                setTimeout(() => window.analytics.page(page.label, {
+                    category: category.label,
+                    path: location.pathname,
+                    area: area
+                }), 0);
+            } else {
+                console.log(area === "" ? page : area);
+                // console.log(sb)
+                // console.log('category', category);
+                // console.log('page', page);
+            }
         }
     }
     return (
