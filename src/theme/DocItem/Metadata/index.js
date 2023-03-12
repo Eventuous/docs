@@ -7,11 +7,12 @@ import {useLocation} from "@docusaurus/router";
 
 let previous = null;
 
+const robots = ["Googlebot"];
+
 export default function MetadataWrapper(props) {
     if (ExecutionEnvironment.canUseDOM) {
-
         const x = useDoc();
-        if (previous !== x) {
+        if (previous !== x && robots.find(r => window.navigator.userAgent.includes(r)) === undefined) {
             previous = x;
             const sb = useSidebarBreadcrumbs();
             const category = sb[0];
