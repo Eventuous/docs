@@ -15,11 +15,12 @@ The Connector is a combination of a real-time subscription (currently only to `$
 
 Currently, the following sinks are supported:
 
-| Sink                                                   | Supported modes     |
-|:-------------------------------------------------------|:--------------------|
-| [Elasticsearch](targets/elastic-target)                | producer, projector |
-| [MongoDB](targets/mongo-target)                        | projector           |
-| [MS SQL Server or Azure SQL](targets/sqlserver-target) | projector           |
+| Sink                                          | Supported modes     |
+|:----------------------------------------------|:--------------------|
+| Generic gRPC                                  | direct sink         |
+| [Elasticsearch](sinks/elasticsearch)          | producer, projector |
+| [MongoDB](sinks/mongodb)                      | projector           |
+| [MS SQL Server or Azure SQL](sinks/sqlserver) | projector           |
 
 :::info
 Because the Connector uses all the features of Eventuous, it is able to execute both produce and project
@@ -31,6 +32,10 @@ observability with traces and metrics.
 ## Connector modes
 
 Below, you can find a description of the different modes that are supported by the connectors.
+
+### Direct sink
+
+The _direct sink_ mode allows to send events to an endpoint directly, allowing to do anything with those events. For example, you can use the generic gRPC sink and create a custom projector to any database using any language that supports gRPC. Current implementation requires the sink to maintain the checkpoint, unlike the other modes, because the direct sink has no access to any persistent storage.
 
 ### Producer mode
 
