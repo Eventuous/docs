@@ -1,16 +1,30 @@
 ---
 title: "MongoDB"
 description: "Project events from EventStoreDB to MongoDB"
-sidebar_position: 1
+sidebar_position: 2
 ---
 
-The MongoDB target only support the `projector` mode for now.
+MongoDB sink only support the `projector` mode for now.
 
-You need to run a gRPC server accessible by the Connector to make the MongoDB target work.
+You need to run a gRPC server (sidecar or a standalone workload) accessible to the Connector to make the sink work.
+
+## Quick start
+
+You can check the samples of MongoDB sidecars:
+- [NodeJS][1]
+- [PHP][2]
+
+Both samples contain the following:
+- Code generated from proto-files by language-specific Protobuf transpiler
+- MongoDB-oriented projections DSL for some of the supported operations
+- Bootstrap code for the gRPC server
+- Actual projections for events produced by the [sample app](https://github.com/Eventuous/dotnet-sample)
+
+Those examples can help you to understand the concept and implement your own projectors.
 
 ## Projector sidecar
 
-You can create a projector gRPC server using any language or stack. The server must support bidirectional streaming. Below, you can find MongoDB-specific response types:
+You can create the projector gRPC server using any language or stack. The server must support bidirectional streaming, and implement the gRPC sidecar interface as described on the [gRPC projector](../../projectors/grpc) page. The `Project` operation of the `Projection` server returns the `ProjectionResponse` message, where the `operation` field should be set to one of the following MongoDB-specific responses:
 
 ```proto
 syntax = "proto3";
@@ -23,12 +37,25 @@ message InsertOne {
   google.protobuf.Struct document = 1;
 }
 
+message InsertMany {
+  repeated google.protobuf.Struct documents = 1;
+}
+
 message UpdateOne {
   google.protobuf.Struct filter = 1;
   google.protobuf.Struct update = 2;
 }
 
+message UpdateMany {
+  google.protobuf.Struct filter = 1;
+  google.protobuf.Struct update = 2;
+}
+
 message DeleteOne {
+  google.protobuf.Struct filter = 1;
+}
+
+message DeleteMany {
   google.protobuf.Struct filter = 1;
 }
 ```
@@ -70,13 +97,6 @@ grpc:
   uri: "http://localhost:9091"
   credentials: "insecure"
 ```
-
-## Samples
-
-We have a few samples for this target:
-
-- [NodeJS][1] implementation
-- [PHP][2] implementation
 
 [1]: https://github.com/Eventuous/connector-sidecar-nodejs-mongo
 [2]: https://github.com/Eventuous/connector-sidecar-php-mongo
