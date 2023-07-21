@@ -38,7 +38,7 @@ Although it is possible to use pattern matching, we recommend using explicit han
 ### Using explicit handlers
 
 :::tip Use explicit handlers
-Eventuous performs additional checks if even types, which are handled by the `When` function, are registered in the type map. If you use pattern matching, the check is impossible to perform, and the application can crash if the event is not registered in the type map.
+Eventuous performs additional checks if event types, which are handled by the `When` function, are registered in the type map. If you use pattern matching, the check is impossible to perform, and the application can crash if the event is not registered in the type map.
 :::
 
 You can also use explicit event handlers, where you define one function per event, and register them in the constructor. In that case, there's no need to override the `When` function.
