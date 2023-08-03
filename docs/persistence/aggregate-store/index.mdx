@@ -36,7 +36,7 @@ Using this pre-made event persistence is easy. You can register the necessary de
 var esdbSettings = EventStoreClientSettings.Create(connectionString);
 builder.Services
     .AddSingleton(new EventStoreClient(esdbSettings))
-    .AddAggregateStore<EsDbEventStore>();
+    .AddAggregateStore<EsdbEventStore>();
 ```
 
 The `AddAggregateStore` extension is available in the `Eventuous.AspNetCore` NuGet package.
