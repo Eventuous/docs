@@ -30,16 +30,18 @@ public record BookingId : AggregateId {
 }
 ```
 
-Create a `StreamNameMap` and register in the container.
+Create a `StreamNameMap` and register in the container:
 
 ```csharp title="Program.cs"
 var streamNameMap = new StreamNameMap();
-streamNameMap.Register<BookingId>(id => new StreamName($"Booking-{id.TenantId}:{id.Value}")); // Split in example with : if you use a Guid as identifier.
-services.AddSingleton(streamNameMap);
+streamNameMap.Register<BookingId>(
+    id => new StreamName($"Booking-{id.TenantId}:{id.Value}") // Split in example with : if you use a Guid as identifier.
+);
+builder.Services.AddSingleton(streamNameMap);
 builder.Services.AddCommandService<BookingService, Booking>();
 ```
 
-Use the registered `StreamNameMap` in the `CommandService`.
+Then, use the registered `StreamNameMap` in the `CommandService`:
 
 ```csharp title="BookingService.cs"
 public class BookingService : CommandService<Booking, BookingState, BookingId> {
@@ -50,21 +52,21 @@ public class BookingService : CommandService<Booking, BookingState, BookingId> {
 }
 ```
 
-In your projections you can retrieve the `Id` and `TenantId` from the `StreamName` in the `IMessageConsumeContext<out T>`. 
+In your projections you can retrieve the `Id` and `TenantId` from the `StreamName` in the `IMessageConsumeContext<out T>`:
 
 ```csharp title="BookingStateProjection.cs"
 static UpdateDefinition<BookingDocument> HandleRoomBooked(
-    IMessageConsumeContext<V1.RoomBooked> ctx, UpdateDefinitionBuilder<BookingDocument> update
+    IMessageConsumeContext<V1.RoomBooked> ctx, 
+    UpdateDefinitionBuilder<BookingDocument> update
 ) {
     var evt = ctx.Message;
 
     // Get Id and TenantId
-	var streamIds = ctx.Stream.ExtractMultiTenantIds();
-    string id = streamIds.Id;
-    string tenantId = streamIds.TenantId;
+	var (id, tenantId) = ctx.Stream.ExtractMultiTenantIds();
 
-	return update.SetOnInsert(
-        x => x.Id, ctx.Stream.GetId()) // use id here...
+	return update
+	    .SetOnInsert(x => x.Id, id) 
+	    .SetOnInsert(x => x.TenantId, tenantId)
         .Set(x => x.GuestId, evt.GuestId)
         .Set(x => x.RoomId, evt.RoomId)
         .Set(x => x.CheckInDate, evt.CheckInDate)
@@ -74,7 +76,7 @@ static UpdateDefinition<BookingDocument> HandleRoomBooked(
 }
 ```
 
-A `StreamName` extension method to retrieve `Id` and `TenantId`.
+The snippet above uses the following extension method to extract the `Id` and `TenantId` from the `StreamName`:
 
 ```csharp title="StreamNameExtensions.cs"
 public static class StreamNameExtensions
