@@ -30,6 +30,19 @@ public record BookingId : AggregateId {
 }
 ```
 
+Create a `StreamNameMap` and register in the container:
+
+```csharp title="Program.cs"
+var streamNameMap = new StreamNameMap();
+streamNameMap.Register<BookingId>(
+    id => new StreamName($"Booking-{id.TenantId}:{id.Value}") // Split in example with : if you use a Guid as identifier.
+);
+builder.Services.AddSingleton(streamNameMap);
+builder.Services.AddCommandService<BookingService, Booking>();
+```
+
+Then, use the registered `StreamNameMap` in the `CommandService`:
+
 ```csharp title="BookingService.cs"
 public class BookingService : CommandService<Booking, BookingState, BookingId> {
     public BookingService(IAggregateStore store, StreamNameMap streamNameMap)
@@ -39,11 +52,53 @@ public class BookingService : CommandService<Booking, BookingState, BookingId> {
 }
 ```
 
-```csharp title="Program.cs"
-var streamNameMap = new StreamNameMap();
-streamNameMap.Register<Booking, BookingState, BookingId>(
-    id => $"Booking-{id.TenantId}-{id.Id}"
-);
-builder.Services.AddSingleton(streamNameMap);
-builder.Services.AddCommandService<BookingService>();
+In your projections you can retrieve the `Id` and `TenantId` from the `StreamName` in the `IMessageConsumeContext<out T>`:
+
+```csharp title="BookingStateProjection.cs"
+static UpdateDefinition<BookingDocument> HandleRoomBooked(
+    IMessageConsumeContext<V1.RoomBooked> ctx, 
+    UpdateDefinitionBuilder<BookingDocument> update
+) {
+    var evt = ctx.Message;
+
+    // Get Id and TenantId
+	var (id, tenantId) = ctx.Stream.ExtractMultiTenantIds();
+
+	return update
+	    .SetOnInsert(x => x.Id, id) 
+	    .SetOnInsert(x => x.TenantId, tenantId)
+        .Set(x => x.GuestId, evt.GuestId)
+        .Set(x => x.RoomId, evt.RoomId)
+        .Set(x => x.CheckInDate, evt.CheckInDate)
+        .Set(x => x.CheckOutDate, evt.CheckOutDate)
+        .Set(x => x.BookingPrice, evt.BookingPrice)
+        .Set(x => x.Outstanding, evt.OutstandingAmount);
+}
+```
+
+The snippet above uses the following extension method to extract the `Id` and `TenantId` from the `StreamName`:
+
+```csharp title="StreamNameExtensions.cs"
+public static class StreamNameExtensions
+{
+    /// <summary>
+    /// Split the StreamName into multiple parts for multi tenant stream id.
+    /// </summary>
+    /// <param name="stream">The streamname</param>
+    /// <param name="separator">The seperator for splitting. Default is ':'.</param>
+    /// <returns>A tuple with TenantId and Id property.</returns>
+    /// <exception cref="InvalidStreamName">When stream id can't be split in 2 sections.</exception>
+    public static (string TenantId, string Id) ExtractMultiTenantIds(this StreamName stream, char separator = ':')
+    {
+    	string streamId = stream.GetId();
+    	var streamIdParts = streamId.Split(separator);
+    
+    	if (streamIdParts.Length != 2)
+    	{
+            throw new InvalidStreamName(streamId);
+    	}
+    
+    	return (streamIdParts[0], streamIdParts[1]);
+    }
+}
 ```
