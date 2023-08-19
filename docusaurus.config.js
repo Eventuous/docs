@@ -95,9 +95,9 @@ const config = {
                         label: 'Connector',
                     },
                     {
-                        href: 'https://eventuous.productlane.com/roadmap',
+                        href: 'https://github.com/sponsors/Eventuous',
                         position: 'right',
-                        label: "Roadmap"
+                        label: "Sponsor"
                     },
                     {
                         href: 'https://medium.com/eventuous',
@@ -140,6 +140,10 @@ const config = {
                     {
                         title: 'More',
                         items: [
+                            {
+                                label: 'Roadmap',
+                                href: 'https://eventuous.productlane.com/roadmap',
+                            },
                             {
                                 label: 'Blog',
                                 href: 'https://medium.com/eventuous',
