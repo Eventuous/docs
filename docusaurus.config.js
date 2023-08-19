@@ -29,7 +29,17 @@ const config = {
         locales: ['en'],
     },
 
-    // plugins: ["./src/plugins/segment"],
+    plugins: [
+        [
+            "posthog",
+            {
+                apiKey: "phc_5SQazjqM8Sy6JYz6eN5hs8pe7BrwQEo2qQbdI1FOhPV",
+                appUrl: "https://eu.posthog.com",
+                enableInDevelopment: false,
+                capture_pageview: false
+            },
+        ],
+    ],
 
     presets: [
         [
