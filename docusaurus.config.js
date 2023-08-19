@@ -36,7 +36,8 @@ const config = {
                 apiKey: "phc_5SQazjqM8Sy6JYz6eN5hs8pe7BrwQEo2qQbdI1FOhPV",
                 appUrl: "https://eu.posthog.com",
                 enableInDevelopment: false,
-                capture_pageview: false
+                capture_pageview: false,
+                opt_in_site_apps: true,
             },
         ],
     ],
