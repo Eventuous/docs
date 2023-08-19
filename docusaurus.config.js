@@ -84,7 +84,7 @@ const config = {
                         label: 'Connector',
                     },
                     {
-                        href: '/ideas',
+                        href: 'https://eventuous.productlane.com/roadmap',
                         position: 'right',
                         label: "Ideas"
                     },
