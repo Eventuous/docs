@@ -86,7 +86,7 @@ const config = {
                     {
                         href: 'https://eventuous.productlane.com/roadmap',
                         position: 'right',
-                        label: "Ideas"
+                        label: "Roadmap"
                     },
                     {
                         href: 'https://medium.com/eventuous',
