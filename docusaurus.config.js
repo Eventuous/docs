@@ -3,6 +3,8 @@
 
 const lightCodeTheme = require('prism-react-renderer/themes/vsLight');
 const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
+// @ts-ignore
+const versions = require('./versions.json');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -31,7 +33,7 @@ const config = {
 
     plugins: [
         [
-            "posthog",
+            "./src/plugins/posthog",
             {
                 apiKey: "phc_5SQazjqM8Sy6JYz6eN5hs8pe7BrwQEo2qQbdI1FOhPV",
                 appUrl: "https://eu.posthog.com",
@@ -93,6 +95,10 @@ const config = {
                         sidebarId: 'connectorSidebar',
                         position: 'left',
                         label: 'Connector',
+                    },
+                    {
+                        type: 'docsVersionDropdown',
+                        position: 'right'
                     },
                     {
                         href: 'https://github.com/sponsors/Eventuous',
