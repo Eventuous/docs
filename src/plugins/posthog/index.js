@@ -54,14 +54,14 @@ module.exports = function (context, options) {
               
               if (!window.analytics) {
                 console.log("Segment snippet not loaded");
-                return;
+              } else {
+                window.analytics.ready(() => { 
+                  let options = ${JSON.stringify(posthogInitOptions)};
+                  options.segment = window.analytics;
+                  options.capture_pageview = false;
+                  posthog.init(${JSON.stringify(apiKey)}, options);
+                });
               }
-              window.analytics.ready(() => { 
-                let options = ${JSON.stringify(posthogInitOptions)};
-                options.segment = window.analytics;
-                options.capture_pageview = false;
-                posthog.init(${JSON.stringify(apiKey)}, options);
-              });
               `,
           },
         ],
