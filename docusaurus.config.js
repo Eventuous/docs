@@ -49,10 +49,6 @@ const config = {
             'classic',
             /** @type {import('@docusaurus/preset-classic').Options} */
             ({
-                // gtag: {
-                //     trackingID: 'G-B5XTDVJ04L',
-                //     anonymizeIP: true,
-                // },
                 docs: {
                     sidebarPath: require.resolve('./sidebars.js'),
                     editUrl: "https://github.com/eventuous/docs/edit/master"
