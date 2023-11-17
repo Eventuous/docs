@@ -8,17 +8,7 @@ description: "How producers are implemented"
 
 Eventuous has two types of producers: with or without produce options. The producer without produce options is a simple producer that does not support any options, and it normally produces messages as-is. The producer with produce options can have more fine-grained control on how messages are produced. Produce options are provided per message batch.
 
-The base interface for a producer is called `IEventProducer` and its only method is `Produce`.
-
-```csharp
-Task Produce(
-    StreamName                   stream,
-    IEnumerable<ProducedMessage> messages,
-    CancellationToken            cancellationToken = default
-);
-```
-
-Producers with produce options must implement the `IEventProducer<TProduceOptions>` interface, which is derived from `IEventProducer`. Therefore, a producer with options can also be used as an option-less producer.
+The base interface for a producer is called `IEventProducer<TProduceOptions>` and its only method is `Produce`.
 
 ```csharp
 Task Produce(

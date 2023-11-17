@@ -31,19 +31,6 @@ const config = {
         locales: ['en'],
     },
 
-    // plugins: [
-    //     [
-    //         "./src/plugins/posthog",
-    //         {
-    //             apiKey: "phc_5SQazjqM8Sy6JYz6eN5hs8pe7BrwQEo2qQbdI1FOhPV",
-    //             appUrl: "https://eu.posthog.com",
-    //             enableInDevelopment: false,
-    //             capture_pageview: false,
-    //             opt_in_site_apps: true,
-    //         },
-    //     ],
-    // ],
-
     presets: [
         [
             'classic',
@@ -102,7 +89,7 @@ const config = {
                         label: "Sponsor"
                     },
                     {
-                        href: 'https://medium.com/eventuous',
+                        href: 'https://blog.eventuous.dev',
                         position: 'right',
                         label: "Blog"
                     },
@@ -134,8 +121,8 @@ const config = {
                         title: 'Community',
                         items: [
                             {
-                                label: 'Slack',
-                                href: 'https://join.slack.com/t/eventuousworkspace/shared_invite/zt-tzrhtbxf-Tk7dSMuoVBvjkSf0Eq~Zpg',
+                                label: 'Discord',
+                                href: 'https://discord.gg/ZrqM6vnnmf',
                             },
                         ],
                     },
@@ -143,12 +130,8 @@ const config = {
                         title: 'More',
                         items: [
                             {
-                                label: 'Roadmap',
-                                href: 'https://eventuous.productlane.com/roadmap',
-                            },
-                            {
                                 label: 'Blog',
-                                href: 'https://medium.com/eventuous',
+                                href: 'https://blog.eventuous.dev',
                             },
                             {
                                 label: 'GitHub',
