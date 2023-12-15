@@ -99,7 +99,7 @@ There are two flavours of the `Filter` function:
 - Use the native `FilterDefinitionBuilder`
 - Use the function that returns a boolean as shown in the example above
 
-Filters are required for `UndateOne`, `UpdateMany`, `DeleteOne` and `DeleteMany` operations.
+Filters are required for `UpdateOne`, `UpdateMany`, `DeleteOne` and `DeleteMany` operations.
 
 When you use `UpdateOne` or `DeleteOne` you can simplify the filter further by using the `Id` function instead of `Filter`. There, you just need to provide a function to get the document id from the event:
 
